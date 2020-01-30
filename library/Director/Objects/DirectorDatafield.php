@@ -85,6 +85,31 @@ class DirectorDatafield extends DbObjectWithSettings
     public static function import($plain, Db $db, $replace = false)
     {
         $properties = (array) $plain;
+
+        if (issert($properties['guid'])) {
+            // check if there is an entry in the database with the same guid
+            $dba = $db->getDbAdapter();
+            $query = $dba->select()
+                ->from('director_datafield')
+                ->where('guid = ?', $plain->guid);
+            $candidates = DirectorDatafield::loadAll($db, $query);
+            // navid-todo: always use first element?
+            foreach ($candidates as $candidate) {
+                $export = $candidate->export();
+                unset($export->originalId);
+                if (Json::encode($export) === $encoded) {
+                    // if the entry is same as the new object, do nothing
+                    return $candidate;
+                } else {
+                    $properties['id'] = $export->id; // set id, as this is used in the WHERE clause of the update later on
+                    $obj = static::create($properties, $db);
+                    $obj->hasBeenModified = true; // an unmodified object will later on be updated in BasketSnapshotFieldResolver storeNewFields()
+                    $obj->hasBeenLoadedFromDb = true; // use update instead of insert
+                    return $obj;
+                }
+            }
+        }
+
         if (isset($properties['originalId'])) {
             $id = $properties['originalId'];
             unset($properties['originalId']);
