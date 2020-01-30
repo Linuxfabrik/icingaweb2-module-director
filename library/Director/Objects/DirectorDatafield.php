@@ -26,6 +26,7 @@ class DirectorDatafield extends DbObjectWithSettings
         'description'   => null,
         'datatype'      => null,
         'format'        => null,
+        'guid'          => null,
     );
 
     protected $settingsTable = 'director_datafield_setting';
@@ -86,7 +87,7 @@ class DirectorDatafield extends DbObjectWithSettings
     {
         $properties = (array) $plain;
 
-        if (issert($properties['guid'])) {
+        if (isset($properties['guid'])) {
             // check if there is an entry in the database with the same guid
             $dba = $db->getDbAdapter();
             $query = $dba->select()

@@ -4,4 +4,4 @@ ALTER TABLE director_datafield ADD COLUMN guid CHAR(36) DEFAULT NULL AFTER forma
 
 INSERT INTO director_schema_migration
   (schema_version, migration_time)
-  VALUES (171, NOW());
+  VALUES (168, NOW());
