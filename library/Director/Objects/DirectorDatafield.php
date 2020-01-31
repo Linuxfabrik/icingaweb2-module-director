@@ -87,6 +87,18 @@ class DirectorDatafield extends DbObjectWithSettings
     {
         $properties = (array) $plain;
 
+        if (isset($properties['settings']->datalist)) {
+            // Just try to load the list, import should fail if missing
+            $list = DirectorDatalist::load(
+                $properties['settings']->datalist,
+                $db
+            );
+        } else {
+            $list = null;
+        }
+
+        $encoded = Json::encode($properties);
+
         if (isset($properties['guid'])) {
             // check if there is an entry in the database with the same guid
             $dba = $db->getDbAdapter();
@@ -97,15 +109,16 @@ class DirectorDatafield extends DbObjectWithSettings
             // navid-todo: always use first element?
             foreach ($candidates as $candidate) {
                 $export = $candidate->export();
+                $export_id = $export->originalId;
                 unset($export->originalId);
                 if (Json::encode($export) === $encoded) {
                     // if the entry is same as the new object, do nothing
                     return $candidate;
                 } else {
-                    $properties['id'] = $export->id; // set id, as this is used in the WHERE clause of the update later on
+                    $properties['id'] = $export_id; // set id, as this is used in the WHERE clause of the update later on
                     $obj = static::create($properties, $db);
                     $obj->hasBeenModified = true; // an unmodified object will later on be updated in BasketSnapshotFieldResolver storeNewFields()
-                    $obj->hasBeenLoadedFromDb = true; // use update instead of insert
+                    $obj->loadedFromDb = true; // use update instead of insert (DbObject store())
                     return $obj;
                 }
             }
@@ -118,17 +131,6 @@ class DirectorDatafield extends DbObjectWithSettings
             $id = null;
         }
 
-        if (isset($properties['settings']->datalist)) {
-            // Just try to load the list, import should fail if missing
-            $list = DirectorDatalist::load(
-                $properties['settings']->datalist,
-                $db
-            );
-        } else {
-            $list = null;
-        }
-
-        $encoded = Json::encode($properties);
         if ($id) {
             if (static::exists($id, $db)) {
                 $existing = static::loadWithAutoIncId($id, $db);
