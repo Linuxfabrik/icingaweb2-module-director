@@ -2,6 +2,7 @@
 
 namespace Icinga\Module\Director\Objects;
 
+use Icinga\Module\Director\Core\Json;
 use Icinga\Module\Director\Db;
 use Icinga\Module\Director\DirectorObject\Automation\ExportInterface;
 use Icinga\Module\Director\Exception\DuplicateKeyException;
@@ -252,20 +253,22 @@ class IcingaCommand extends IcingaObject implements ObjectWithArguments, ExportI
                 ->from('icinga_command')
                 ->where('guid = ?', $plain->guid);
             $candidates = IcingaCommand::loadAll($db, $query);
-            // navid-todo: always use first element, else throw error (there should never be duplicate guids)
-            foreach ($candidates as $candidate) {
-                $export = $candidate->export();
-                $export_id = $export->originalId;
-                unset($export->originalId);
-                if (Json::encode($export) === $encoded) {
-                    // if the entry is same as the new object, do nothing
-                    $object = $candidate;
-                } else {
-                    $properties['id'] = $export_id; // set id, as this is used in the WHERE clause of the update later on
-                    $object = static::create([], $db);
-                    $object->hasBeenModified = true; // an unmodified object will later on be updated in BasketSnapshotFieldResolver storeNewFields()
-                    $object->loadedFromDb = true; // use update instead of insert (DbObject store())
+            if (count($candidates) > 0) {
+                // navid-todo: always use first element, else throw error (there should never be duplicate guids)
+                foreach ($candidates as $candidate) {
+                    $export = $candidate->export();
+                    $encoded = Json::encode($properties);
+                    if (Json::encode($export) === $encoded) {
+                        // if the entry is same as the new object, do nothing
+                        $object = $candidate;
+                    } else {
+                        $object = static::create([], $db);
+                        $object->hasBeenModified = true; // an unmodified object will later on be updated in BasketSnapshotFieldResolver storeNewFields()
+                        $object->loadedFromDb = true; // use update instead of insert (DbObject store())
+                    }
                 }
+            } else {
+                $object = static::create([], $db);        
             }
         } elseif ($replace && static::exists($key, $db)) {
             $object = static::load($key, $db);
@@ -280,7 +283,6 @@ class IcingaCommand extends IcingaObject implements ObjectWithArguments, ExportI
 
         unset($properties['fields']);
         $object->setProperties($properties);
-
         return $object;
     }
 

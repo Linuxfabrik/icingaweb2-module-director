@@ -276,6 +276,8 @@ class BasketSnapshot extends DbObject
         foreach ($objects as $key => $object) {
             /** @var DbObject $new */
             $new = $class::import($object, $connection, $replace);
+            echo '<br>new:<br>';
+            var_dump($new);
             if ($new->hasBeenModified()) {
                 if ($new instanceof IcingaObject && $new->supportsImports()) {
                     /** @var ExportInterface $new */
