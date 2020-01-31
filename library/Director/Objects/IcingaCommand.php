@@ -28,6 +28,7 @@ class IcingaCommand extends IcingaObject implements ObjectWithArguments, ExportI
         'timeout'         => null,
         'zone_id'         => null,
         'is_string'       => null,
+        'guid'            => null,
     ];
 
     protected $booleans = [
@@ -244,7 +245,29 @@ class IcingaCommand extends IcingaObject implements ObjectWithArguments, ExportI
         $name = $properties['object_name'];
         $key = $name;
 
-        if ($replace && static::exists($key, $db)) {
+        if (isset($properties['guid'])) {
+            // check if there is an entry in the database with the same guid
+            $dba = $db->getDbAdapter();
+            $query = $dba->select()
+                ->from('icinga_command')
+                ->where('guid = ?', $plain->guid);
+            $candidates = IcingaCommand::loadAll($db, $query);
+            // navid-todo: always use first element, else throw error (there should never be duplicate guids)
+            foreach ($candidates as $candidate) {
+                $export = $candidate->export();
+                $export_id = $export->originalId;
+                unset($export->originalId);
+                if (Json::encode($export) === $encoded) {
+                    // if the entry is same as the new object, do nothing
+                    $object = $candidate;
+                } else {
+                    $properties['id'] = $export_id; // set id, as this is used in the WHERE clause of the update later on
+                    $object = static::create([], $db);
+                    $object->hasBeenModified = true; // an unmodified object will later on be updated in BasketSnapshotFieldResolver storeNewFields()
+                    $object->loadedFromDb = true; // use update instead of insert (DbObject store())
+                }
+            }
+        } elseif ($replace && static::exists($key, $db)) {
             $object = static::load($key, $db);
         } elseif (static::exists($key, $db)) {
             throw new DuplicateKeyException(
