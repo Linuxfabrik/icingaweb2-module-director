@@ -2,6 +2,7 @@
 
 namespace Icinga\Module\Director\DirectorObject\Automation;
 
+use Icinga\Module\Director\CustomVariable\CustomVariables;
 use Icinga\Module\Director\Db;
 use Icinga\Module\Director\Objects\DirectorDatafield;
 use Icinga\Module\Director\Objects\IcingaObject;
@@ -59,6 +60,9 @@ class BasketSnapshotFieldResolver
             if ($field->hasBeenModified()) {
                 $field->store();
                 $this->idMap[$id] = $field->get('id');
+                if ($field->shouldBeRenamed()) {
+                    CustomVariables::renameAll($field->getOldName(), $field->get('varname'), $this->targetDb);
+                }
             }
         }
     }

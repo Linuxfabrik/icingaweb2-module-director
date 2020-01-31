@@ -54,6 +54,17 @@ class DirectorDatafield extends DbObjectWithSettings
         return $obj;
     }
 
+    protected $shouldBeRenamed = false;
+    protected $oldName = '';
+
+    public function shouldBeRenamed() {
+        return $this->shouldBeRenamed;
+    }
+
+    public function getOldName() {
+        return $this->oldName;
+    }
+
     /**
      * @return object
      * @throws \Icinga\Exception\NotFoundError
@@ -106,7 +117,7 @@ class DirectorDatafield extends DbObjectWithSettings
                 ->from('director_datafield')
                 ->where('guid = ?', $plain->guid);
             $candidates = DirectorDatafield::loadAll($db, $query);
-            // navid-todo: always use first element?
+            // navid-todo: always use first element, else throw error (there should never be duplicate guids)
             foreach ($candidates as $candidate) {
                 $export = $candidate->export();
                 $export_id = $export->originalId;
@@ -119,6 +130,10 @@ class DirectorDatafield extends DbObjectWithSettings
                     $obj = static::create($properties, $db);
                     $obj->hasBeenModified = true; // an unmodified object will later on be updated in BasketSnapshotFieldResolver storeNewFields()
                     $obj->loadedFromDb = true; // use update instead of insert (DbObject store())
+                    if ($export->varname != $properties['varname']) {
+                        $obj->shouldBeRenamed = true;
+                        $obj->oldName = $export->varname;
+                    }
                     return $obj;
                 }
             }
