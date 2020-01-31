@@ -61,6 +61,7 @@ class BasketSnapshotFieldResolver
                 $field->store();
                 $this->idMap[$id] = $field->get('id');
                 if ($field->shouldBeRenamed()) {
+                    // navid-todo: allow a flag in the basket to toggle this behavior
                     CustomVariables::renameAll($field->getOldName(), $field->get('varname'), $this->targetDb);
                 }
             }
