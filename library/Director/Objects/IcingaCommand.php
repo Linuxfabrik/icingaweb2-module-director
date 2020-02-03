@@ -276,6 +276,7 @@ class IcingaCommand extends IcingaObject implements ObjectWithArguments, ExportI
 
         unset($properties['fields']);
         $object->setProperties($properties);
+        
         return $object;
     }
 
