@@ -255,6 +255,7 @@ class IcingaServiceSet extends IcingaObject implements ExportInterface
                 $new->store();
             }
         }
+        // navid-todo: remove all services from $existingServices that are not in $services (aka delete services that are not part of the basket import)
 
         return $object;
     }
