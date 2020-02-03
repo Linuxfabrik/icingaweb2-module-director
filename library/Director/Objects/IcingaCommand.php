@@ -256,19 +256,12 @@ class IcingaCommand extends IcingaObject implements ObjectWithArguments, ExportI
             if (count($candidates) > 0) {
                 // navid-todo: always use first element, else throw error (there should never be duplicate guids)
                 foreach ($candidates as $candidate) {
-                    $export = $candidate->export();
-                    $encoded = Json::encode($properties);
-                    if (Json::encode($export) === $encoded) {
-                        // if the entry is same as the new object, do nothing
-                        $object = $candidate;
-                    } else {
-                        $object = static::create([], $db);
-                        $object->hasBeenModified = true; // an unmodified object will later on be updated in BasketSnapshotFieldResolver storeNewFields()
-                        $object->loadedFromDb = true; // use update instead of insert (DbObject store())
-                    }
+                    $object = $candidate;
+                    $object->hasBeenModified = true; // an unmodified object will later on be updated in BasketSnapshotFieldResolver storeNewFields()
+                    $object->loadedFromDb = true; // use update instead of insert (DbObject store())
                 }
             } else {
-                $object = static::create([], $db);        
+                $object = static::create([], $db);
             }
         } elseif ($replace && static::exists($key, $db)) {
             $object = static::load($key, $db);

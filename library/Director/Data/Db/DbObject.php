@@ -302,7 +302,6 @@ abstract class DbObject
      */
     public function set($key, $value)
     {
-        echo "<br>set: $key";
         $key = (string) $key;
         if ($value === '') {
             $value = null;
@@ -327,7 +326,6 @@ abstract class DbObject
         }
 
         if (method_exists($this, $func)) {
-            echo "<br>set end (func): $key";
             return $this->$func($value);
         }
 
@@ -341,7 +339,6 @@ abstract class DbObject
         if ((is_numeric($value) || is_string($value))
             && (string) $value === (string) $this->get($key)
         ) {
-            echo "<br>set end (no object): $key";
             return $this;
         }
 
@@ -349,18 +346,14 @@ abstract class DbObject
             throw new InvalidArgumentException('Changing autoincremental key is not allowed');
         }
 
-        echo "<br>set end: $key";
         return $this->reallySet($key, $value);
     }
 
     protected function reallySet($key, $value)
     {
-        echo "<br>reallySet: $key";
         if ($value === $this->properties[$key]) {
-            echo ' equal';
             return $this;
         }
-        echo ' modified';
         $this->hasBeenModified = true;
         $this->modifiedProperties[$key] = true;
         $this->properties[$key] = $value;
@@ -425,7 +418,6 @@ abstract class DbObject
      */
     public function setProperties($props)
     {
-        var_dump($props);
         if (! is_array($props)) {
             throw new InvalidArgumentException(sprintf(
                 'Array required, got %s',
@@ -435,8 +427,6 @@ abstract class DbObject
         foreach ($props as $key => $value) {
             $this->set($key, $value);
         }
-        echo '<br><br>setProperties:<br>';
-        var_dump($this);
         return $this;
     }
 
