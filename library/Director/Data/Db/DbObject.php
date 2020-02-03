@@ -797,6 +797,9 @@ abstract class DbObject
         }
 
         $this->beforeStore();
+        if (array_key_exists('guid', $this->defaultProperties) && is_null($this->properties['guid'])) {
+            $this->set('guid', DbObject::generateGuid());
+        }
         $table = $this->table;
         $id = $this->getId();
 
