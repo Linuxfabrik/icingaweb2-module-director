@@ -71,6 +71,7 @@ class IcingaDependency extends IcingaObject implements ExportInterface
         'object_name',
         'object_type',
         'apply_to',
+        'guid',
     ];
 
     public function getUniqueIdentifier()
