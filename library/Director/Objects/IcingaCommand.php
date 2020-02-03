@@ -2,7 +2,6 @@
 
 namespace Icinga\Module\Director\Objects;
 
-use Icinga\Module\Director\Core\Json;
 use Icinga\Module\Director\Db;
 use Icinga\Module\Director\DirectorObject\Automation\ExportInterface;
 use Icinga\Module\Director\Exception\DuplicateKeyException;
