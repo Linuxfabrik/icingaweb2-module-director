@@ -354,7 +354,6 @@ abstract class DbObject
         if ($value === $this->properties[$key]) {
             return $this;
         }
-        
         $this->hasBeenModified = true;
         $this->modifiedProperties[$key] = true;
         $this->properties[$key] = $value;
@@ -933,6 +932,9 @@ abstract class DbObject
         }
 
         $key = $this->getKeyName();
+        if (isset($this->properties['guid'])) {
+            $key = 'guid';
+        }
 
         if (is_array($key) && ! empty($key)) {
             $where = array();
