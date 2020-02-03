@@ -211,7 +211,7 @@ class IcingaService extends IcingaObject implements ExportInterface
             $query = $dba->select()
                 ->from('icinga_service')
                 ->where('guid = ?', $plain->guid);
-            $candidates = IcingaCommand::loadAll($db, $query);
+            $candidates = IcingaService::loadAll($db, $query);
             if (count($candidates) > 0) {
                 // navid-todo: always use first element, else throw error (there should never be duplicate guids)
                 foreach ($candidates as $candidate) {
