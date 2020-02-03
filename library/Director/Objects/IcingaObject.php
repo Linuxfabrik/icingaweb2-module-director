@@ -97,6 +97,7 @@ abstract class IcingaObject extends DbObject implements IcingaConfigRenderer
         'id',
         'object_name',
         'object_type',
+        'guid'
     ];
 
     /**
