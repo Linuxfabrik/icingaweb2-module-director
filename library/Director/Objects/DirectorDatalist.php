@@ -18,8 +18,8 @@ class DirectorDatalist extends DbObject implements ExportInterface
     protected $defaultProperties = array(
         'id'            => null,
         'list_name'     => null,
-        'owner'         => null
-        'guid'          => null
+        'owner'         => null,
+        'guid'          => null,
     );
 
     /** @var DirectorDatalistEntry[] */
