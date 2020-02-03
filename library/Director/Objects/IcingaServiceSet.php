@@ -237,6 +237,7 @@ class IcingaServiceSet extends IcingaObject implements ExportInterface
             's.*'
         )->where('service_set_id = ?', $setId);
         $existingServices = IcingaService::loadAll($db, $sQuery, 'object_name');
+        $newServicesGuids = array();
         foreach ($services as $service) {
             if (isset($service->fields)) {
                 unset($service->fields);
@@ -249,13 +250,19 @@ class IcingaServiceSet extends IcingaObject implements ExportInterface
                 if ($existing->hasBeenModified()) {
                     $existing->store();
                 }
+                unset($existingServices[$name]);
             } else {
                 $new = IcingaService::create((array) $service, $db);
                 $new->set('service_set_id', $setId);
                 $new->store();
             }
         }
-        // navid-todo: remove all services from $existingServices that are not in $services (aka delete services that are not part of the basket import)
+        // remove all services from $existingServices that are not in $services (aka delete services that are not part of the basket import)
+        echo 'test';
+        foreach ($existingServices as $name => $service) {
+            var_dump($service);
+            $service->delete();
+        }
 
         return $object;
     }
