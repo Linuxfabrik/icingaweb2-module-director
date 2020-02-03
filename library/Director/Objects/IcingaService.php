@@ -59,6 +59,7 @@ class IcingaService extends IcingaObject implements ExportInterface
         'use_var_overrides'       => null,
         'assign_filter'           => null,
         'template_choice_id'      => null,
+        'guid'                    => null,
     ];
 
     protected $relations = [
@@ -204,7 +205,24 @@ class IcingaService extends IcingaObject implements ExportInterface
             'object_name' => $name
         ];
 
-        if ($replace && static::exists($key, $db)) {
+        if (isset($properties['guid'])) {
+            // check if there is an entry in the database with the same guid
+            $dba = $db->getDbAdapter();
+            $query = $dba->select()
+                ->from('icinga_service')
+                ->where('guid = ?', $plain->guid);
+            $candidates = IcingaCommand::loadAll($db, $query);
+            if (count($candidates) > 0) {
+                // navid-todo: always use first element, else throw error (there should never be duplicate guids)
+                foreach ($candidates as $candidate) {
+                    $object = $candidate;
+                    $object->hasBeenModified = true; // an unmodified object will later on be updated in BasketSnapshotFieldResolver storeNewFields()
+                    $object->loadedFromDb = true; // use update instead of insert (DbObject store())
+                }
+            } else {
+                $object = static::create([], $db);
+            }
+        } elseif ($replace && static::exists($key, $db)) {
             $object = static::load($key, $db);
         } elseif (static::exists($key, $db)) {
             throw new DuplicateKeyException(
