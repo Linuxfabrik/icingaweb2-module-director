@@ -128,7 +128,7 @@ class DirectorDatafield extends DbObjectWithSettings
                 } else {
                     $properties['id'] = $export_id; // set id, as this is used in the WHERE clause of the update later on
                     $obj = static::create($properties, $db);
-                    $obj->hasBeenModified = true; // an unmodified object will later on be updated in BasketSnapshotFieldResolver storeNewFields()
+                    $obj->hasBeenModified = true; // a modified object will later updated later on
                     $obj->loadedFromDb = true; // use update instead of insert (DbObject store())
                     if ($export->varname != $properties['varname']) {
                         $obj->shouldBeRenamed = true;

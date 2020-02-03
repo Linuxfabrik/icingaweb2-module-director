@@ -256,7 +256,7 @@ class IcingaCommand extends IcingaObject implements ObjectWithArguments, ExportI
                 // navid-todo: always use first element, else throw error (there should never be duplicate guids)
                 foreach ($candidates as $candidate) {
                     $object = $candidate;
-                    $object->hasBeenModified = true; // an unmodified object will later on be updated in BasketSnapshotFieldResolver storeNewFields()
+                    $object->hasBeenModified = true; // a modified object will later updated later on
                     $object->loadedFromDb = true; // use update instead of insert (DbObject store())
                 }
             } else {
