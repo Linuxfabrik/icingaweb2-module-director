@@ -19,6 +19,7 @@ class DirectorDatalist extends DbObject implements ExportInterface
         'id'            => null,
         'list_name'     => null,
         'owner'         => null
+        'guid'          => null
     );
 
     /** @var DirectorDatalistEntry[] */
@@ -47,7 +48,24 @@ class DirectorDatalist extends DbObject implements ExportInterface
         }
         $name = $properties['list_name'];
 
-        if ($replace && static::exists($name, $db)) {
+        if (isset($properties['guid'])) {
+            // check if there is an entry in the database with the same guid
+            $dba = $db->getDbAdapter();
+            $query = $dba->select()
+                ->from('director_datalist')
+                ->where('guid = ?', $plain->guid);
+            $candidates = DirectorDatalist::loadAll($db, $query);
+            if (count($candidates) > 0) {
+                // navid-todo: always use first element, else throw error (there should never be duplicate guids)
+                foreach ($candidates as $candidate) {
+                    $object = $candidate;
+                    $object->hasBeenModified = true; // an unmodified object will later on be updated in BasketSnapshotFieldResolver storeNewFields()
+                    $object->loadedFromDb = true; // use update instead of insert (DbObject store())
+                }
+            } else {
+                $object = static::create([], $db);
+            }
+        } elseif ($replace && static::exists($name, $db)) {
             $object = static::load($name, $db);
         } elseif (static::exists($name, $db)) {
             throw new DuplicateKeyException(
