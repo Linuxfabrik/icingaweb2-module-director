@@ -1042,7 +1042,7 @@ abstract class DbObject
     {
     }
 
-    public function generateGuid() {
+    public static function generateGuid() {
 
         if (function_exists('com_create_guid') === true) {
             return trim(com_create_guid(), '{}');
@@ -1065,9 +1065,6 @@ abstract class DbObject
         $obj = new static();
         if ($connection !== null) {
             $obj->setConnection($connection);
-        }
-        if (array_key_exists('guid', $properties ) && $properties['guid'] === null) {
-            $properties['guid'] = $this->generateGuid();
         }
         $obj->setProperties($properties);
         return $obj;
