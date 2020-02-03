@@ -83,9 +83,9 @@ class IcingaTimePeriod extends IcingaObject implements ExportInterface
             // check if there is an entry in the database with the same guid
             $dba = $db->getDbAdapter();
             $query = $dba->select()
-                ->from('icinga_command')
+                ->from('icinga_timeperiod')
                 ->where('guid = ?', $plain->guid);
-            $candidates = IcingaCommand::loadAll($db, $query);
+            $candidates = IcingaTimePeriod::loadAll($db, $query);
             if (count($candidates) > 0) {
                 // navid-todo: always use first element, else throw error (there should never be duplicate guids)
                 foreach ($candidates as $candidate) {
