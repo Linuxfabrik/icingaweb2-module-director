@@ -2,6 +2,7 @@
 
 namespace Icinga\Module\Director\Objects;
 
+use Icinga\Exception\NotFoundError;
 use Icinga\Module\Director\Core\Json;
 use Icinga\Module\Director\Data\Db\DbObjectWithSettings;
 use Icinga\Module\Director\Db;
@@ -77,11 +78,15 @@ class DirectorDatafield extends DbObjectWithSettings
         $plain->settings = (object) $this->getSettings();
 
         if (property_exists($plain->settings, 'datalist_id')) {
-            $plain->settings->datalist = DirectorDatalist::loadWithAutoIncId(
-                $plain->settings->datalist_id,
-                $this->getConnection()
-            )->get('list_name');
-            unset($plain->settings->datalist_id);
+            // It is possible that the datalist does not exists yet, but is part of the new basket
+            try {
+                $plain->settings->datalist = DirectorDatalist::loadWithAutoIncId(
+                    $plain->settings->datalist_id,
+                    $this->getConnection()
+                )->get('list_name');
+            } catch (NotFoundError $e) {
+            }
+           unset($plain->settings->datalist_id);
         }
 
         return $plain;
