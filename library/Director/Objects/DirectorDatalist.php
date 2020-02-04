@@ -61,11 +61,14 @@ class DirectorDatalist extends DbObject implements ExportInterface
                     $object = $candidate;
                     $object->hasBeenModified = true; // a modified object will later updated later on
                     $object->loadedFromDb = true; // use update instead of insert (DbObject store())
+                    $object->setProperties($properties);
+
+                    return $object;
                 }
-            } else {
-                $object = static::create([], $db);
             }
-        } elseif ($replace && static::exists($name, $db)) {
+        }
+        
+        if ($replace && static::exists($name, $db)) {
             $object = static::load($name, $db);
         } elseif (static::exists($name, $db)) {
             throw new DuplicateKeyException(

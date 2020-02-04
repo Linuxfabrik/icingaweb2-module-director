@@ -103,6 +103,25 @@ class DirectorDatafield extends DbObjectWithSettings
     {
         $properties = (array) $plain;
         $encoded = Json::encode($properties);
+        
+        if (isset($properties['settings']->datalist)) {
+            // It is possible that the datalist does not exists yet, but is part of the new basket
+            try {
+                $list = DirectorDatalist::load(
+                    $properties['settings']->datalist,
+                    $db
+                );
+            } catch (NotFoundError $e) {
+                $list = null;
+            }
+        } else {
+            $list = null;
+        }
+
+        if ($list) {
+            unset($properties['settings']->datalist);
+            $properties['settings']->datalist_id = $list->get('id');
+        }
 
         if (isset($properties['guid'])) {
             // check if there is an entry in the database with the same guid
@@ -149,25 +168,6 @@ class DirectorDatafield extends DbObjectWithSettings
                     return $existing;
                 }
             }
-        }
-
-        if (isset($properties['settings']->datalist)) {
-            // It is possible that the datalist does not exists yet, but is part of the new basket
-            try {
-                $list = DirectorDatalist::load(
-                    $properties['settings']->datalist,
-                    $db
-                );
-            } catch (NotFoundError $e) {
-                $list = null;
-            }
-        } else {
-            $list = null;
-        }
-
-        if ($list) {
-            unset($properties['settings']->datalist);
-            $properties['settings']->datalist_id = $list->get('id');
         }
 
         $dba = $db->getDbAdapter();

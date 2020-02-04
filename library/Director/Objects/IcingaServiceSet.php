@@ -209,11 +209,50 @@ class IcingaServiceSet extends IcingaObject implements ExportInterface
                     $object = $candidate;
                     $object->hasBeenModified = true; // a modified object will later updated later on
                     $object->loadedFromDb = true; // use update instead of insert (DbObject store())
+                    $object->setProperties($properties);
+
+                    // This is not how other imports work, but here we need an ID
+                    if (! $object->hasBeenLoadedFromDb()) {
+                        $object->store();
+                    }
+
+                    $setId = $object->get('id');
+                    $sQuery = $db->getDbAdapter()->select()->from(
+                        ['s' => 'icinga_service'],
+                        's.*'
+                    )->where('service_set_id = ?', $setId);
+                    $existingServices = IcingaService::loadAll($db, $sQuery, 'object_name');
+                    $newServicesGuids = array();
+                    foreach ($services as $service) {
+                        if (isset($service->fields)) {
+                            unset($service->fields);
+                        }
+                        $name = $service->object_name;
+                        if (isset($existingServices[$name])) {
+                            $existing = $existingServices[$name];
+                            $existing->setProperties((array) $service);
+                            $existing->set('service_set_id', $setId);
+                            if ($existing->hasBeenModified()) {
+                                $existing->store();
+                            }
+                            unset($existingServices[$name]);
+                        } else {
+                            $new = IcingaService::create((array) $service, $db);
+                            $new->set('service_set_id', $setId);
+                            $new->store();
+                        }
+                    }
+                    // remove all services from $existingServices that are not in $services (aka delete services that are not part of the basket import)
+                    foreach ($existingServices as $name => $service) {
+                        $service->delete();
+                    }
+
+                    return $object;
                 }
-            } else {
-                $object = static::create([], $db);
             }
-        } elseif ($replace && static::exists($name, $db)) {
+        }
+
+        if ($replace && static::exists($name, $db)) {
             $object = static::load($name, $db);
         } elseif (static::exists($name, $db)) {
             throw new DuplicateKeyException(
@@ -258,9 +297,7 @@ class IcingaServiceSet extends IcingaObject implements ExportInterface
             }
         }
         // remove all services from $existingServices that are not in $services (aka delete services that are not part of the basket import)
-        echo 'test';
         foreach ($existingServices as $name => $service) {
-            var_dump($service);
             $service->delete();
         }
 

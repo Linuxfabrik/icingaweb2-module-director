@@ -92,11 +92,14 @@ class IcingaTimePeriod extends IcingaObject implements ExportInterface
                     $object = $candidate;
                     $object->hasBeenModified = true; // a modified object will later updated later on
                     $object->loadedFromDb = true; // use update instead of insert (DbObject store())
+                    $object->setProperties($properties);
+
+                    return $object;
                 }
-            } else {
-                $object = static::create([], $db);
             }
-        } elseif ($replace && static::exists($key, $db)) {
+        }
+        
+        if ($replace && static::exists($key, $db)) {
             $object = static::load($key, $db);
         } elseif (static::exists($key, $db)) {
             throw new DuplicateKeyException(
