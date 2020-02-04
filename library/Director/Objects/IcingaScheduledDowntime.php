@@ -48,6 +48,7 @@ class IcingaScheduledDowntime extends IcingaObject
         'object_name',
         'object_type',
         'with_services',
+        'guid',
     ];
 
     /**

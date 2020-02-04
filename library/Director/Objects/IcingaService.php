@@ -115,7 +115,8 @@ class IcingaService extends IcingaObject implements ExportInterface
         'id',
         'object_name',
         'object_type',
-        'apply_for'
+        'apply_for',
+        'guid',
     ];
 
     /** @var ServiceGroupMembershipResolver */
