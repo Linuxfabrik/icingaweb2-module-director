@@ -97,17 +97,6 @@ class DirectorDatafield extends DbObjectWithSettings
     public static function import($plain, Db $db, $replace = false)
     {
         $properties = (array) $plain;
-
-        if (isset($properties['settings']->datalist)) {
-            // Just try to load the list, import should fail if missing
-            $list = DirectorDatalist::load(
-                $properties['settings']->datalist,
-                $db
-            );
-        } else {
-            $list = null;
-        }
-
         $encoded = Json::encode($properties);
 
         if (isset($properties['guid'])) {
@@ -155,6 +144,20 @@ class DirectorDatafield extends DbObjectWithSettings
                     return $existing;
                 }
             }
+        }
+
+        if (isset($properties['settings']->datalist)) {
+            // It is possible that the datalist does not exists yet, but is part of the new basket
+            try {
+                $list = DirectorDatalist::load(
+                    $properties['settings']->datalist,
+                    $db
+                );
+            } catch (NotFoundError $e) {
+                $list = null;
+            }
+        } else {
+            $list = null;
         }
 
         if ($list) {
