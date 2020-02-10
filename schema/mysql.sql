@@ -161,6 +161,7 @@ CREATE TABLE director_datalist (
   id INT(10) UNSIGNED AUTO_INCREMENT NOT NULL,
   list_name VARCHAR(255) NOT NULL,
   owner VARCHAR(255) NOT NULL,
+  guid CHAR(36) DEFAULT NULL,
   PRIMARY KEY (id),
   UNIQUE KEY list_name (list_name)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
@@ -187,6 +188,7 @@ CREATE TABLE director_datafield (
   datatype varchar(255) NOT NULL,
 -- datatype_param? multiple ones?
   format enum ('string', 'json', 'expression'),
+  guid CHAR(36) DEFAULT NULL,
   PRIMARY KEY (id),
   KEY search_idx (varname)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
@@ -258,6 +260,7 @@ CREATE TABLE icinga_timeperiod (
   object_type ENUM('object', 'template') NOT NULL,
   disabled ENUM('y', 'n') NOT NULL DEFAULT 'n',
   prefer_includes ENUM('y', 'n') DEFAULT NULL,
+  guid CHAR(36) DEFAULT NULL,
   PRIMARY KEY (id),
   UNIQUE INDEX object_name (object_name, zone_id),
   CONSTRAINT icinga_timeperiod_zone
@@ -346,6 +349,7 @@ CREATE TABLE icinga_command (
   -- vars text DEFAULT NULL,
   timeout SMALLINT UNSIGNED DEFAULT NULL,
   zone_id INT(10) UNSIGNED DEFAULT NULL,
+  guid CHAR(36) DEFAULT NULL,
   PRIMARY KEY (id),
   UNIQUE INDEX object_name (object_name),
   CONSTRAINT icinga_command_zone
@@ -532,6 +536,7 @@ CREATE TABLE icinga_host (
   accept_config ENUM('y', 'n') DEFAULT NULL,
   api_key VARCHAR(40) DEFAULT NULL,
   template_choice_id INT(10) UNSIGNED DEFAULT NULL,
+  guid CHAR(36) DEFAULT NULL,
   PRIMARY KEY (id),
   UNIQUE INDEX object_name (object_name),
   UNIQUE INDEX api_key (api_key),
@@ -634,6 +639,7 @@ CREATE TABLE icinga_service_set (
   host_id INT(10) UNSIGNED DEFAULT NULL,
   description TEXT DEFAULT NULL,
   assign_filter TEXT DEFAULT NULL,
+  guid CHAR(36) DEFAULT NULL,
   PRIMARY KEY (id),
   UNIQUE KEY object_key (object_name, host_id),
   CONSTRAINT icinga_service_set_host
@@ -691,6 +697,7 @@ CREATE TABLE icinga_service (
   use_var_overrides ENUM('y', 'n') DEFAULT NULL,
   assign_filter TEXT DEFAULT NULL,
   template_choice_id INT(10) UNSIGNED DEFAULT NULL,
+  guid CHAR(36) DEFAULT NULL,
   PRIMARY KEY (id),
   UNIQUE KEY object_key (object_name, host_id),
   CONSTRAINT icinga_service_host
@@ -1203,6 +1210,7 @@ CREATE TABLE icinga_notification (
   period_id INT(10) UNSIGNED DEFAULT NULL,
   zone_id INT(10) UNSIGNED DEFAULT NULL,
   assign_filter TEXT DEFAULT NULL,
+  guid CHAR(36) DEFAULT NULL,
   PRIMARY KEY (id),
   CONSTRAINT icinga_notification_host
     FOREIGN KEY host (host_id)
@@ -1708,6 +1716,7 @@ CREATE TABLE icinga_dependency (
   zone_id INT(10) UNSIGNED DEFAULT NULL,
   assign_filter TEXT DEFAULT NULL,
   parent_service_by_name VARCHAR(255) DEFAULT NULL,
+  guid CHAR(36) DEFAULT NULL,
   PRIMARY KEY (id),
   CONSTRAINT icinga_dependency_parent_host
     FOREIGN KEY parent_host (parent_host_id)
@@ -1869,4 +1878,4 @@ CREATE TABLE icinga_scheduled_downtime_range (
 
 INSERT INTO director_schema_migration
   (schema_version, migration_time)
-  VALUES (167, NOW());
+  VALUES (168, NOW());
