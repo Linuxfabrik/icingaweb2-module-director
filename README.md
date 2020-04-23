@@ -1,64 +1,53 @@
-Icinga Director
-===============
+# Linuxfabrik Fork of the Icinga Director
 
-Icinga Director has been designed to make Icinga 2 configuration handling easy.
-It tries to target two main audiences:
+## Motivation - Why we forked
 
-* Users with the desire to completely automate their datacenter
-* Sysops willing to grant their "point & click" users a lot of flexibility
+We are managing the Icinga Director configuration of many Icinga2 Servers using the Icinga Director Basket Ex- and Import. Currently the basket matches objects using its _name_, which means that it is _impossible_ to rename existing objects. Instead, if renaming, a new object is created with the new name, requiring us to manually delete the object with the old name on every Icinga2 Server.
 
-What makes Icinga Director so special is the fact that it tries to target both
-of them at once.
+This is especially problematic with DataFields: If you change any attribute (for example the caption or just the description) the original Icinga Director Basket creates a _new_ DataField. Assuming one did not modify the field name, we now have two DataFields with the same field name. When deleting the first/old one, you will be prompted if the related vars should be wiped.
 
-![Icinga Director](doc/screenshot/director/readme/director_main_screen.png)
+This behavior is ugly and misleading, and the problem simply exists because the Icinga Director is not relying on IDs in its database.
 
-Read more about Icinga Director in our [Introduction](doc/01-Introduction.md) section.
-Afterwards, you should be ready for [getting started](doc/04-Getting-started.md).
-
-Documentation
--------------
-
-Please have a look at our [Installation instructions](doc/02-Installation.md)
-and our hints for how to apply [Upgrades](doc/05-Upgrading.md). We love automation
-and in case you also do so, the [Automation chapter](doc/03-Automation.md) could
-be worth a read. When upgrading, you should also have a look at our [Changelog](doc/82-Changelog.md).
-
-You could be interested in understanding how the [Director works](doc/10-How-it-works.md)
-internally. [Working with agents](doc/24-Working-with-agents.md) is a topic that
-affects many Icinga administrators. Other interesting entry points might be
-[Import and Synchronization](doc/70-Import-and-Sync.md), our [CLI interface](doc/60-CLI.md),
-the [REST API](doc/70-REST-API.md) and last but not least our [FAQ](doc/80-FAQ.md).
-
-A complete list of all our documentation can be found in the [doc](doc/) directory.
-
-Contributing
-------------
-
-Icinga Director is an Open Source project and lives from your contributions. No
-matter whether these are feature requests, issues, translations, documentation
-or code.
-
-* Please check whether a related issue already exists on our [Issue Tracker](https://github.com/Icinga/icingaweb2-module-director/issues)
-* Make sure your code conforms to the [PSR-2: Coding Style Guide](http://www.php-fig.org/psr/psr-2/)
-* [Unit-Tests](doc/93-Testing.md) would be great
-* Send a [Pull Request](https://github.com/Icinga/icingaweb2-module-director/pulls)
- (it will automatically be tested on Travis-CI)
-* We try hard to keep our master always green: [![Build Status](https://travis-ci.org/Icinga/icingaweb2-module-director.svg?branch=master)](https://travis-ci.org/Icinga/icingaweb2-module-director)
+We changed that.
 
 
-Addons
-------
+## Features
 
-The following are to be considered community-supported modules, as they are not
-supported by the Icinga Team. At least not yet. But please give them a try if
-they fit your needs. They are being used in productive environments:
+This fork of the Icinga Director implements [GUIDs](https://en.wikipedia.org/wiki/Universally_unique_identifier) for most of the database objects to make the handling of the director basket easier.
 
-* [AWS - Amazon Web Services](https://github.com/Icinga/icingaweb2-module-aws):
-  provides an Import Source for Autoscaling Groups on AWS
-* [File-Shipper](https://github.com/Icinga/icingaweb2-module-fileshipper):
-  allows Director to ship additional config files with manual config with its
-  deployments
-* [PuppetDB](https://github.com/Icinga/icingaweb2-module-puppetdb): provides
-  an Import Source dealing with your PuppetDB
-* [vSphere](https://github.com/Icinga/icingaweb2-module-vsphere): VMware vSphere
-  Import Source for Virtual Machines and Host Systems
+The following objects will be saved with a GUID in the database when they are created or imported from a basket:
+
+* DataFields
+* Commands
+* Service Templates
+* Service Sets
+* Host Templates
+* Notification Templates
+* Timeperiods
+* Dependencies
+* DataLists
+
+This allows the following tasks to be accomplished by importing a basket:
+
+* Changing the name of objects listed above. Without GUIDs, this would always create a new object instead.
+* DataFields: When renaming, all applied custom variables (for example to a host) will be renamed as well.
+* DataLists: Entries can be removed from the list. Note: This does not affect applied entries, as they are saved as strings in the database. See [Known Limitations](#known-limitations) below.
+* Service Sets: Services can be removed from the set.
+
+
+## Installation
+
+Please follow the [original installation guide](https://git.linuxfabrik.ch/linuxfabrik/icingaweb2-module-director/-/blob/v1.7.2.2020021001/doc/02-Installation.md) but use our [latest release](https://git.linuxfabrik.ch/linuxfabrik/icingaweb2-module-director/-/releases) instead of the original director.
+
+
+## Known limitations
+
+* DataFields: Renaming or removing an entry will only rename/remove the entry in the datalist, not the applied variables on other objects such as hosts or services.
+* Cloning does not work right now, because it tries to duplicate the GUID.
+
+
+## Future
+
+* The GUIDs could be used to allow deletion of certain objects during the basket import, for example a deprecated service.
+* The basket import could ignore the enabled/disabled state of objects, allowing us to customize the Icinga Director config on one system without it being overwritten by an import.
+* We are in contact with the Icinga guys about this project.
