@@ -153,6 +153,52 @@ class CustomVariables implements Iterator, Countable, IcingaConfigRenderer
         return $this;
     }
 
+    /**
+     * TODO
+     *
+     * @param string $key
+     * @param mixed  $value
+     *
+     * @return self
+     */
+    public function mergeOrSet($key, $value)
+    {
+        $key = (string) $key;
+
+        if ($value instanceof CustomVariable) {
+            $value = clone($value);
+        } else {
+            if ($value === null) {
+                $this->__unset($key);
+                return $this;
+            }
+            $value = CustomVariable::create($key, $value);
+        }
+
+        // Hint: isset($this->$key) wouldn't conflict with protected properties
+        if ($this->__isset($key)) {
+            if ($value->equals($this->get($key))) {
+                return $this;
+            } else {
+                if (get_class($this->vars[$key]) === get_class($value)) {
+                    if ($value->supportsMerging()) {
+                        $value->merge($this->vars[$key]);
+                    }
+                    $this->vars[$key]->setValue($value->getValue())->setModified();
+                } else {
+                    $this->vars[$key] = $value->setLoadedFromDb()->setModified();
+                }
+            }
+        } else {
+            $this->vars[$key] = $value->setModified();
+        }
+
+        $this->modified = true;
+        $this->refreshIndex();
+
+        return $this;
+    }
+
     protected function refreshIndex()
     {
         $this->idx = array();

@@ -10,6 +10,8 @@ class CustomVariableArray extends CustomVariable
     /** @var  CustomVariable[] */
     protected $value;
 
+    protected $supportsMerging = true;
+
     public function equals(CustomVariable $var)
     {
         if (! $var instanceof CustomVariableArray) {
@@ -96,5 +98,14 @@ class CustomVariableArray extends CustomVariable
     public function toLegacyConfigString()
     {
         return c1::renderArray($this->value);
+    }
+
+    public function merge(CustomVariableArray $other)
+    {
+        if ($this->equals($other)) {
+            return $this;
+        }
+        $this->value = array_unique(array_merge($value, $other));
+        return $this;
     }
 }

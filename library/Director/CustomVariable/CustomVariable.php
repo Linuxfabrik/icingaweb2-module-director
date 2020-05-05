@@ -25,6 +25,8 @@ abstract class CustomVariable implements IcingaConfigRenderer
 
     protected $deleted = false;
 
+    protected $supportsMerging = false;
+
     protected $checksum;
 
     protected function __construct($key, $value = null)
@@ -283,4 +285,15 @@ abstract class CustomVariable implements IcingaConfigRenderer
             die();
         }
     }
+
+    /**
+     * Whether this CustomVariable supports merging
+     *
+     * @return bool
+     */
+    public function supportsMerging()
+    {
+        return $this->supportsMerging;
+    }
+
 }

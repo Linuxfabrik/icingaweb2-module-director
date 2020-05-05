@@ -2746,7 +2746,7 @@ abstract class IcingaObject extends DbObject implements IcingaConfigRenderer
             } else {
                 /** @var CustomVariables $vars */
                 foreach ($vars as $key => $var) {
-                    $myVars->set($key, $var);
+                    $myVars->mergeOrSet($key, $var);
                 }
             }
         }
