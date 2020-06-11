@@ -105,7 +105,7 @@ class CustomVariableArray extends CustomVariable
         if ($this->equals($other)) {
             return $this;
         }
-        $this->value = array_unique(array_merge($value, $other));
+        $this->value = array_unique(array_merge($this->value, $other->value));
         return $this;
     }
 }
