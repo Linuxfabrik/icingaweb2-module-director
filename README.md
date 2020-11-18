@@ -37,7 +37,7 @@ This allows the following tasks to be accomplished by importing a basket:
 
 ## Installation
 
-Please follow the [original installation guide](https://git.linuxfabrik.ch/linuxfabrik/icingaweb2-module-director/-/blob/v1.7.2.2020021001/doc/02-Installation.md) but use our [latest release](https://git.linuxfabrik.ch/linuxfabrik/icingaweb2-module-director/-/releases) instead of the original director.
+Please follow the [original installation guide](https://git.linuxfabrik.ch/linuxfabrik/icingaweb2-module-director/-/blob/v1.7.2.2020111801/doc/02-Installation.md) but use our [latest release](https://git.linuxfabrik.ch/linuxfabrik/icingaweb2-module-director/-/releases) instead of the original director.
 
 
 ## Known limitations
