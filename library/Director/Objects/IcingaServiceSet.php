@@ -222,8 +222,7 @@ class IcingaServiceSet extends IcingaObject implements ExportInterface
                         's.*'
                     )->where('service_set_id = ?', $setId);
                     $existingServices = IcingaService::loadAll($db, $sQuery, 'object_name');
-                    $existingServicesGuid = IcingaService::loadAll($db, $sQuery, 'guid');
-                    $newServicesGuids = array();
+                    $existingServices = IcingaService::loadAll($db, $sQuery, 'guid');
                     foreach ($services as $service) {
                         if (isset($service->fields)) {
                             unset($service->fields);
@@ -231,29 +230,16 @@ class IcingaServiceSet extends IcingaObject implements ExportInterface
 
                         if (isset($service->guid)) {
                             $guid = $service->guid;
-                            echo "$service->object_name\n";
-                            if (isset($existingServicesGuid[$guid])) {
-                                $existing = $existingServicesGuid[$guid];
+                            if (isset($existingServices[$guid])) {
+                                $existing = $existingServices[$guid];
                                 $existing->setProperties((array) $service);
                                 $existing->set('service_set_id', $setId);
                                 if ($existing->hasBeenModified()) {
                                     $existing->store();
                                 }
-                                unset($existingServicesGuid[$guid]);
+                                unset($existingServices[$guid]);
                                 continue;
                             }
-                        }
-
-                        $name = $service->object_name;
-                        if (isset($existingServices[$name])) {
-                            $existing = $existingServices[$name];
-                            $existing->setProperties((array) $service);
-                            $existing->set('service_set_id', $setId);
-                            if ($existing->hasBeenModified()) {
-                                $existing->store();
-                            }
-                            unset($existingServices[$name]);
-                            continue;
                         }
 
                         $new = IcingaService::create((array) $service, $db);
@@ -294,7 +280,6 @@ class IcingaServiceSet extends IcingaObject implements ExportInterface
             's.*'
         )->where('service_set_id = ?', $setId);
         $existingServices = IcingaService::loadAll($db, $sQuery, 'object_name');
-        $newServicesGuids = array();
         foreach ($services as $service) {
             if (isset($service->fields)) {
                 unset($service->fields);
