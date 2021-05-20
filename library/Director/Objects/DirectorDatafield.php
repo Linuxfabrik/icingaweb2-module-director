@@ -150,6 +150,9 @@ class DirectorDatafield extends DbObjectWithSettings
                     return $obj;
                 }
             }
+            // the object to be imported has a guid, but is not found in the databse. this means, it has to be a new object.
+            unset($properties['originalId']);
+            return static::create($properties, $db);
         }
 
         if (isset($properties['originalId'])) {

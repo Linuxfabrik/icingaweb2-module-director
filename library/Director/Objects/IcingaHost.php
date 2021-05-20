@@ -323,6 +323,15 @@ class IcingaHost extends IcingaObject implements ExportInterface
 
                     return $object;
                 }
+            } else {
+                // the object to be imported has a guid, but is not found in the databse. this means, it has to be a new object.
+                $object = static::create([], $db);
+
+                // $object->newFields = $properties['fields'];
+                unset($properties['fields']);
+                $object->setProperties($properties);
+
+                return $object;
             }
         }
 

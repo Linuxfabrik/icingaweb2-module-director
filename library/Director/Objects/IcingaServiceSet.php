@@ -253,18 +253,21 @@ class IcingaServiceSet extends IcingaObject implements ExportInterface
 
                     return $object;
                 }
+            } else {
+                // the object to be imported has a guid, but is not found in the databse. this means, it has to be a new object.
+                $object = static::create([], $db);
             }
-        }
-
-        if ($replace && static::exists($name, $db)) {
-            $object = static::load($name, $db);
-        } elseif (static::exists($name, $db)) {
-            throw new DuplicateKeyException(
-                'Service Set "%s" already exists',
-                $name
-            );
         } else {
-            $object = static::create([], $db);
+            if ($replace && static::exists($name, $db)) {
+                $object = static::load($name, $db);
+            } elseif (static::exists($name, $db)) {
+                throw new DuplicateKeyException(
+                    'Service Set "%s" already exists',
+                    $name
+                );
+            } else {
+                $object = static::create([], $db);
+            }
         }
 
         $object->setProperties($properties);

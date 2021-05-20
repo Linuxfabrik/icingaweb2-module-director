@@ -263,9 +263,17 @@ class IcingaCommand extends IcingaObject implements ObjectWithArguments, ExportI
                     
                     return $object;
                 }
+            } else {
+                // the object to be imported has a guid, but is not found in the databse. this means, it has to be a new object.
+                $object = static::create([], $db);
+
+                unset($properties['fields']);
+                $object->setProperties($properties);
+
+                return $object;
             }
         }
-        
+
         if ($replace && static::exists($key, $db)) {
             $object = static::load($key, $db);
         } elseif (static::exists($key, $db)) {
