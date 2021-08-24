@@ -105,7 +105,7 @@ class IcingaTimePeriod extends IcingaObject implements ExportInterface
                 return $object;
             }
         }
-        
+
         if ($replace && static::exists($key, $db)) {
             $object = static::load($key, $db);
         } elseif (static::exists($key, $db)) {

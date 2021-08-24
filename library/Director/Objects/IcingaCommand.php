@@ -260,7 +260,7 @@ class IcingaCommand extends IcingaObject implements ObjectWithArguments, ExportI
                     $object->loadedFromDb = true; // use update instead of insert (DbObject store())
                     unset($properties['fields']);
                     $object->setProperties($properties);
-                    
+
                     return $object;
                 }
             } else {
@@ -287,7 +287,7 @@ class IcingaCommand extends IcingaObject implements ObjectWithArguments, ExportI
 
         unset($properties['fields']);
         $object->setProperties($properties);
-        
+
         return $object;
     }
 

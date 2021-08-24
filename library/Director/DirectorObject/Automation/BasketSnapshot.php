@@ -60,7 +60,6 @@ class BasketSnapshot extends DbObject
         'ts_create',
     ];
 
-    // navid-todo: when implementing deleting, adjust this order
     protected $restoreOrder = [
         'CommandTemplate',
         'ExternalCommand',

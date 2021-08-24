@@ -354,6 +354,7 @@ abstract class DbObject
         if ($value === $this->properties[$key]) {
             return $this;
         }
+
         $this->hasBeenModified = true;
         $this->modifiedProperties[$key] = true;
         $this->properties[$key] = $value;

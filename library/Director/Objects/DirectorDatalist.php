@@ -74,7 +74,7 @@ class DirectorDatalist extends DbObject implements ExportInterface
                 return $object;
             }
         }
-        
+
         if ($replace && static::exists($name, $db)) {
             $object = static::load($name, $db);
         } elseif (static::exists($name, $db)) {
