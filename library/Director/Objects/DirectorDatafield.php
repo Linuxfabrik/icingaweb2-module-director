@@ -78,15 +78,11 @@ class DirectorDatafield extends DbObjectWithSettings
         $plain->settings = (object) $this->getSettings();
 
         if (property_exists($plain->settings, 'datalist_id')) {
-            // It is possible that the datalist does not exists yet, but is part of the new basket
-            try {
-                $plain->settings->datalist = DirectorDatalist::loadWithAutoIncId(
-                    $plain->settings->datalist_id,
-                    $this->getConnection()
-                )->get('list_name');
-            } catch (NotFoundError $e) {
-            }
-           unset($plain->settings->datalist_id);
+            $plain->settings->datalist = DirectorDatalist::loadWithAutoIncId(
+                $plain->settings->datalist_id,
+                $this->getConnection()
+            )->get('list_name');
+            unset($plain->settings->datalist_id);
         }
 
         return $plain;
@@ -105,15 +101,11 @@ class DirectorDatafield extends DbObjectWithSettings
         $encoded = Json::encode($properties);
 
         if (isset($properties['settings']->datalist)) {
-            // It is possible that the datalist does not exists yet, but is part of the new basket
-            try {
-                $list = DirectorDatalist::load(
-                    $properties['settings']->datalist,
-                    $db
-                );
-            } catch (NotFoundError $e) {
-                $list = null;
-            }
+            // Just try to load the list, import should fail if missing
+            $list = DirectorDatalist::load(
+                $properties['settings']->datalist,
+                $db
+            );
         } else {
             $list = null;
         }
