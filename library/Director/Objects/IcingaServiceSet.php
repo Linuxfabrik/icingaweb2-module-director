@@ -261,6 +261,8 @@ class IcingaServiceSet extends IcingaObject implements ExportInterface
                 );
             }
         } else {
+            // when there is a guid, this code shouldn't run since create() will already have been called.
+            // unlike other import functions, we do not return after the create() as the code below the if-statement need to run
             if ($replace && static::exists($name, $db)) {
                 $object = static::load($name, $db);
             } elseif (static::exists($name, $db)) {
