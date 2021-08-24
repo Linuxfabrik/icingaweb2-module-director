@@ -309,21 +309,18 @@ class IcingaHost extends IcingaObject implements ExportInterface
             $dba = $db->getDbAdapter();
             $query = $dba->select()
                 ->from('icinga_host')
-                ->where('guid = ?', $plain->guid);
-            $candidates = IcingaHost::loadAll($db, $query);
-            if (count($candidates) > 0) {
-                // navid-todo: always use first element, else throw error (there should never be duplicate guids)
-                foreach ($candidates as $candidate) {
-                    $object = $candidate;
-                    $object->hasBeenModified = true; // a modified object will later updated later on
-                    $object->loadedFromDb = true; // use update instead of insert (DbObject store())
-                    // $object->newFields = $properties['fields'];
-                    unset($properties['fields']);
-                    $object->setProperties($properties);
+                ->where('guid = ?', $properties['guid']);
+            $candidates = self::loadAll($db, $query);
+            if (count($candidates) == 1) {
+                $object = reset($candidates);
+                $object->hasBeenModified = true; // a modified object will later updated later on
+                $object->loadedFromDb = true; // use update instead of insert (DbObject store())
+                // $object->newFields = $properties['fields'];
+                unset($properties['fields']);
+                $object->setProperties($properties);
 
-                    return $object;
-                }
-            } else {
+                return $object;
+            } elseif (count($candidates) == 0) {
                 // the object to be imported has a guid, but is not found in the databse. this means, it has to be a new object.
                 $object = static::create([], $db);
 
@@ -332,6 +329,12 @@ class IcingaHost extends IcingaObject implements ExportInterface
                 $object->setProperties($properties);
 
                 return $object;
+            } elseif (count($candidates) > 1) {
+                throw new DuplicateKeyException(
+                    'Host Template "%s" with guid "%s" already exists. This means there is a duplicate guid in the database. This should never happen.',
+                    $name,
+                    $properties['guid']
+                );
             }
         }
 
@@ -339,7 +342,7 @@ class IcingaHost extends IcingaObject implements ExportInterface
             $object = static::load($key, $db);
         } elseif (static::exists($key, $db)) {
             throw new DuplicateKeyException(
-                'Service Template "%s" already exists',
+                'Host Template "%s" already exists',
                 $name
             );
         } else {

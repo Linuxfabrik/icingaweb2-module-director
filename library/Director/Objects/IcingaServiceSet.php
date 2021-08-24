@@ -201,61 +201,64 @@ class IcingaServiceSet extends IcingaObject implements ExportInterface
             $dba = $db->getDbAdapter();
             $query = $dba->select()
                 ->from('icinga_service_set')
-                ->where('guid = ?', $plain->guid);
-            $candidates = IcingaServiceSet::loadAll($db, $query);
-            if (count($candidates) > 0) {
-                // navid-todo: always use first element, else throw error (there should never be duplicate guids)
-                foreach ($candidates as $candidate) {
-                    $object = $candidate;
-                    $object->hasBeenModified = true; // a modified object will later updated later on
-                    $object->loadedFromDb = true; // use update instead of insert (DbObject store())
-                    $object->setProperties($properties);
+                ->where('guid = ?', $properties['guid']);
+            $candidates = self::loadAll($db, $query);
+            if (count($candidates) == 1) {
+                $object = reset($candidates);
+                $object->hasBeenModified = true; // a modified object will later updated later on
+                $object->loadedFromDb = true; // use update instead of insert (DbObject store())
+                $object->setProperties($properties);
 
-                    // This is not how other imports work, but here we need an ID
-                    if (! $object->hasBeenLoadedFromDb()) {
-                        $object->store();
-                    }
-
-                    $setId = $object->get('id');
-                    $sQuery = $db->getDbAdapter()->select()->from(
-                        ['s' => 'icinga_service'],
-                        's.*'
-                    )->where('service_set_id = ?', $setId);
-                    $existingServices = IcingaService::loadAll($db, $sQuery, 'object_name');
-                    $existingServices = IcingaService::loadAll($db, $sQuery, 'guid');
-                    foreach ($services as $service) {
-                        if (isset($service->fields)) {
-                            unset($service->fields);
-                        }
-
-                        if (isset($service->guid)) {
-                            $guid = $service->guid;
-                            if (isset($existingServices[$guid])) {
-                                $existing = $existingServices[$guid];
-                                $existing->setProperties((array) $service);
-                                $existing->set('service_set_id', $setId);
-                                if ($existing->hasBeenModified()) {
-                                    $existing->store();
-                                }
-                                unset($existingServices[$guid]);
-                                continue;
-                            }
-                        }
-
-                        $new = IcingaService::create((array) $service, $db);
-                        $new->set('service_set_id', $setId);
-                        $new->store();
-                    }
-                    // remove all services from $existingServices that are not in $services (aka delete services that are not part of the basket import)
-                    foreach ($existingServices as $name => $service) {
-                        $service->delete();
-                    }
-
-                    return $object;
+                // This is not how other imports work, but here we need an ID
+                if (! $object->hasBeenLoadedFromDb()) {
+                    $object->store();
                 }
-            } else {
+
+                $setId = $object->get('id');
+                $sQuery = $db->getDbAdapter()->select()->from(
+                    ['s' => 'icinga_service'],
+                    's.*'
+                )->where('service_set_id = ?', $setId);
+                $existingServices = IcingaService::loadAll($db, $sQuery, 'object_name');
+                $existingServices = IcingaService::loadAll($db, $sQuery, 'guid');
+                foreach ($services as $service) {
+                    if (isset($service->fields)) {
+                        unset($service->fields);
+                    }
+
+                    if (isset($service->guid)) {
+                        $guid = $service->guid;
+                        if (isset($existingServices[$guid])) {
+                            $existing = $existingServices[$guid];
+                            $existing->setProperties((array) $service);
+                            $existing->set('service_set_id', $setId);
+                            if ($existing->hasBeenModified()) {
+                                $existing->store();
+                            }
+                            unset($existingServices[$guid]);
+                            continue;
+                        }
+                    }
+
+                    $new = IcingaService::create((array) $service, $db);
+                    $new->set('service_set_id', $setId);
+                    $new->store();
+                }
+                // remove all services from $existingServices that are not in $services (aka delete services that are not part of the basket import)
+                foreach ($existingServices as $name => $service) {
+                    $service->delete();
+                }
+
+                return $object;
+            } elseif (count($candidates) == 0) {
                 // the object to be imported has a guid, but is not found in the databse. this means, it has to be a new object.
                 $object = static::create([], $db);
+            } elseif (count($candidates) > 1) {
+                throw new DuplicateKeyException(
+                    'Service Set "%s" with guid "%s" already exists. This means there is a duplicate guid in the database. This should never happen.',
+                    $name,
+                    $properties['guid']
+                );
             }
         } else {
             if ($replace && static::exists($name, $db)) {

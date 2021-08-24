@@ -128,10 +128,10 @@ class DirectorDatafield extends DbObjectWithSettings
             $dba = $db->getDbAdapter();
             $query = $dba->select()
                 ->from('director_datafield')
-                ->where('guid = ?', $plain->guid);
-            $candidates = DirectorDatafield::loadAll($db, $query);
-            // navid-todo: always use first element, else throw error (there should never be duplicate guids)
-            foreach ($candidates as $candidate) {
+                ->where('guid = ?', $properties['guid']);
+            $candidates = self::loadAll($db, $query);
+            if (count($candidates) == 1) {
+                $candidate = reset($candidates);
                 $export = $candidate->export();
                 $export_id = $export->originalId;
                 unset($export->originalId);
@@ -141,7 +141,7 @@ class DirectorDatafield extends DbObjectWithSettings
                 } else {
                     $properties['id'] = $export_id; // set id, as this is used in the WHERE clause of the update later on
                     $obj = static::create($properties, $db);
-                    $obj->hasBeenModified = true; // a modified object will later updated later on
+                    $obj->hasBeenModified = true; // a modified object will updated later on
                     $obj->loadedFromDb = true; // use update instead of insert (DbObject store())
                     if ($export->varname != $properties['varname']) {
                         $obj->shouldBeRenamed = true;
@@ -149,10 +149,17 @@ class DirectorDatafield extends DbObjectWithSettings
                     }
                     return $obj;
                 }
+            } elseif (count($candidates) == 0) {
+                // the object to be imported has a guid, but is not found in the databse. this means, it has to be a new object.
+                unset($properties['originalId']);
+                return static::create($properties, $db);
+            } elseif (count($candidates) > 1) {
+                throw new DuplicateKeyException(
+                    'Datafield "%s" with guid "%s" already exists. This means there is a duplicate guid in the database. This should never happen.',
+                    $name,
+                    $properties['guid']
+                );
             }
-            // the object to be imported has a guid, but is not found in the databse. this means, it has to be a new object.
-            unset($properties['originalId']);
-            return static::create($properties, $db);
         }
 
         if (isset($properties['originalId'])) {
