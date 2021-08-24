@@ -272,13 +272,18 @@ class BasketSnapshot extends DbObject
         $class = static::getClassForType($typeName);
 
         $changed = [];
+        $new_objects = [];
         foreach ($objects as $key => $object) {
             /** @var DbObject $new */
             $new = $class::import($object, $connection, $replace);
             if ($new->hasBeenModified()) {
                 if ($new instanceof IcingaObject && $new->supportsImports()) {
                     /** @var ExportInterface $new */
-                    $changed[$new->getUniqueIdentifier()] = $new;
+                    if ($new->hasBeenLoadedFromDb()) {
+                        $changed[$new->getUniqueIdentifier()] = $new;
+                    } else {
+                        $new_objects[$new->getUniqueIdentifier()] = $new;
+                    }
                 } else {
                     $new->store();
                     // Linking fields right now, as we're not in $changed
@@ -301,6 +306,16 @@ class BasketSnapshot extends DbObject
             $this->recursivelyStore($object, $changed);
         }
         foreach ($changed as $key => $new) {
+            // Store related fields. As objects might have formerly been
+            // un-stored, let's to it right here
+            if ($new instanceof IcingaObject) {
+                $fieldResolver->relinkObjectFields($new, $objects[$key]);
+            }
+        }
+        foreach ($new_objects as $object) {
+            $this->recursivelyStore($object, $new_objects);
+        }
+        foreach ($new_objects as $key => $new) {
             // Store related fields. As objects might have formerly been
             // un-stored, let's to it right here
             if ($new instanceof IcingaObject) {
