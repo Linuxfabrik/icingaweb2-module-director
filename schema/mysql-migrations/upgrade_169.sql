@@ -18,4 +18,4 @@ ALTER TABLE director_datafield
 
 INSERT INTO director_schema_migration
   (schema_version, migration_time)
-  VALUES (168, NOW());
+  VALUES (169, NOW());
