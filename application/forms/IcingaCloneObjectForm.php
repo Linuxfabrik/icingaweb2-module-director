@@ -122,7 +122,9 @@ class IcingaCloneObjectForm extends DirectorForm
             $object->toPlainObject($resolve),
             $connection
         )->set('object_name', $newName);
-        $new->set('guid', Uuid::uuid4()->toString());
+        if ($new->hasProperty('guid')) {
+            $new->set('guid', Uuid::uuid4()->toString());
+        }
 
         if ($new->isExternal()) {
             $new->set('object_type', 'object');
@@ -175,15 +177,21 @@ class IcingaCloneObjectForm extends DirectorForm
                 } elseif ($new instanceof IcingaServiceSet) {
                     $clone->set('service_set_id', $newId);
                 }
-                $clone->set('guid', Uuid::uuid4()->toString());
+                if ($clone->hasProperty('guid')) {
+                    $clone->set('guid', Uuid::uuid4()->toString());
+                }
                 $clone->store();
             }
 
             foreach ($sets as $set) {
-                IcingaServiceSet::fromPlainObject(
+                $clone = IcingaServiceSet::fromPlainObject(
                     $set->toPlainObject(),
                     $connection
-                )->set('host_id', $newId)->set('guid', Uuid::uuid4()->toString())->store();
+                )->set('host_id', $newId);
+                if ($clone->hasProperty('guid')) {
+                    $clone->set('guid', Uuid::uuid4()->toString());
+                }
+                $clone->store();
             }
 
             foreach ($fields as $row) {
