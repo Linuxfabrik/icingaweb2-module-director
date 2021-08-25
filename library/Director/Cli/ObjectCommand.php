@@ -6,6 +6,7 @@ use Icinga\Cli\Params;
 use Icinga\Exception\MissingParameterException;
 use Icinga\Module\Director\Objects\IcingaObject;
 use InvalidArgumentException;
+use Ramsey\Uuid\Uuid;
 
 class ObjectCommand extends Command
 {
@@ -311,6 +312,7 @@ class ObjectCommand extends Command
             );
 
             $object->set('object_name', $name);
+            $object->set('guid', Uuid::uuid4()->toString());
 
             if ($replace && $this->exists($name)) {
                 $object = $this->load($name)->replaceWith($object);

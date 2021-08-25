@@ -9,6 +9,7 @@ use Icinga\Module\Director\Objects\IcingaObject;
 use Icinga\Module\Director\Objects\IcingaService;
 use Icinga\Module\Director\Objects\IcingaServiceSet;
 use Icinga\Module\Director\Web\Form\DirectorForm;
+use Ramsey\Uuid\Uuid;
 
 class IcingaCloneObjectForm extends DirectorForm
 {
@@ -121,6 +122,7 @@ class IcingaCloneObjectForm extends DirectorForm
             $object->toPlainObject($resolve),
             $connection
         )->set('object_name', $newName);
+        $new->set('guid', Uuid::uuid4()->toString());
 
         if ($new->isExternal()) {
             $new->set('object_type', 'object');
@@ -173,6 +175,7 @@ class IcingaCloneObjectForm extends DirectorForm
                 } elseif ($new instanceof IcingaServiceSet) {
                     $clone->set('service_set_id', $newId);
                 }
+                $clone->set('guid', Uuid::uuid4()->toString());
                 $clone->store();
             }
 
@@ -180,7 +183,7 @@ class IcingaCloneObjectForm extends DirectorForm
                 IcingaServiceSet::fromPlainObject(
                     $set->toPlainObject(),
                     $connection
-                )->set('host_id', $newId)->store();
+                )->set('host_id', $newId)->set('guid', Uuid::uuid4()->toString())->store();
             }
 
             foreach ($fields as $row) {
