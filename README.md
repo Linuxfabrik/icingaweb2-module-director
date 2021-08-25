@@ -37,6 +37,12 @@ This allows the following tasks to be accomplished by importing a basket:
 
 ## Installation
 
+The module needs modifications to the director MySQL/MariaDB database (provided in the `schema/guid.sql` file).
+You can import the schema using the following command:
+```bash
+mysql -p -u root director < schema/guid.sql
+```
+
 Please follow the [original installation guide](https://git.linuxfabrik.ch/linuxfabrik/icingaweb2-module-director/-/blob/v1.7.2.2020111901/doc/02-Installation.md) but use our [latest release](https://git.linuxfabrik.ch/linuxfabrik/icingaweb2-module-director/-/releases) instead of the original director.
 
 
