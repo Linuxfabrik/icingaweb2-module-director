@@ -3,7 +3,9 @@
 namespace Icinga\Module\Director\Import;
 
 use Exception;
+use Icinga\Application\Benchmark;
 use Icinga\Exception\IcingaException;
+use Icinga\Module\Director\Data\RecursiveUtf8Validator;
 use Icinga\Module\Director\Db;
 use Icinga\Module\Director\Hook\ImportSourceHook;
 use Icinga\Module\Director\Objects\ImportSource;
@@ -164,7 +166,9 @@ class Import
             $this->data = ImportSourceHook::forImportSource(
                 $this->source
             )->fetchData();
+            Benchmark::measure('Fetched all data from Import Source');
             $this->source->applyModifiers($this->data);
+            Benchmark::measure('Applied Property Modifiers to imported data');
         }
 
         return $this->data;
@@ -332,7 +336,13 @@ class Import
 
             $this->rowsetExists = true;
         } catch (Exception $e) {
-            $db->rollBack();
+            try {
+                $db->rollBack();
+            } catch (Exception $e) {
+                // Well...
+            }
+            // Eventually throws details for invalid UTF8 characters
+            RecursiveUtf8Validator::validateRows($this->data);
             throw $e;
         }
     }
@@ -443,7 +453,7 @@ class Import
      *
      * @param array $array
      */
-    protected function sortArrayObject(& $array)
+    protected function sortArrayObject(&$array)
     {
         foreach ($array as $key => $val) {
             $this->sortElement($val);
@@ -455,7 +465,7 @@ class Import
      *
      * @param mixed $el
      */
-    protected function sortElement(& $el)
+    protected function sortElement(&$el)
     {
         if (is_array($el)) {
             $this->sortArrayObject($el);

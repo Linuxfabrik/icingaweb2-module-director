@@ -104,11 +104,11 @@ class ImportSource extends DbObjectWithSettings implements ExportInterface
             $object = static::create([], $db);
         }
 
-        $object->setProperties($properties);
-        if ($id !== null) {
-            // TODO: really?
-            $object->reallySet('id', $id);
+        if (! isset($properties['modifiers'])) {
+            $properties['modifiers'] = [];
         }
+
+        $object->setProperties($properties);
 
         return $object;
     }
@@ -118,8 +118,8 @@ class ImportSource extends DbObjectWithSettings implements ExportInterface
         if ($this->loadedRowModifiers === null && $this->hasBeenLoadedFromDb()) {
             $this->loadedRowModifiers = $this->fetchRowModifiers();
         }
-        $current = $this->loadedRowModifiers;
-        if ($current !== null && count($current) !== count($modifiers)) {
+        $current = (array) $this->loadedRowModifiers;
+        if (\count($current) !== \count($modifiers)) {
             $this->newRowModifiers = $modifiers;
         } else {
             $i = 0;
@@ -129,9 +129,9 @@ class ImportSource extends DbObjectWithSettings implements ExportInterface
                 if ($this->loadedRowModifiers[$i]->hasBeenModified()) {
                     $modified = true;
                 }
+                $i++;
             }
             if ($modified) {
-                // TOOD: no newRowModifiers, directly store loaded ones if diff
                 $this->newRowModifiers = $modifiers;
             }
         }
@@ -299,7 +299,7 @@ class ImportSource extends DbObjectWithSettings implements ExportInterface
         return null;
     }
 
-    public function applyModifiers(& $data)
+    public function applyModifiers(&$data)
     {
         $modifiers = $this->fetchFlatRowModifiers();
 
@@ -307,21 +307,37 @@ class ImportSource extends DbObjectWithSettings implements ExportInterface
             return $this;
         }
 
-
         foreach ($modifiers as $modPair) {
             /** @var PropertyModifierHook $modifier */
             list($property, $modifier) = $modPair;
             $rejected = [];
+            $newRows = [];
             foreach ($data as $key => $row) {
                 $this->applyPropertyModifierToRow($modifier, $property, $row);
                 if ($modifier->rejectsRow()) {
                     $rejected[] = $key;
                     $modifier->rejectRow(false);
                 }
+                if ($modifier->expandsRows()) {
+                    $target = $modifier->getTargetProperty($property);
+
+                    $newValue = $row->$target;
+                    if (\is_array($newValue)) {
+                        foreach ($newValue as $val) {
+                            $newRow = clone $row;
+                            $newRow->$target = $val;
+                            $newRows[] = $newRow;
+                        }
+                        $rejected[] = $key;
+                    }
+                }
             }
 
             foreach ($rejected as $key) {
                 unset($data[$key]);
+            }
+            foreach ($newRows as $row) {
+                $data[] = $row;
             }
         }
 

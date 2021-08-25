@@ -25,11 +25,21 @@ Requirements
 * A database, MySQL (&gt;= 5.1) or PostgreSQL (&gt;= 9.1). MariaDB and other
   MySQL forks are also fine. Mentioned versions are the required minimum,
   for MySQL we suggest using at least 5.5.3, for PostgreSQL 9.4.
-* PHP (>= 5.6.3). For best performance please consider use 7.x
+* PHP (>= 5.6.3). For best performance please consider use 7.x or 8.x
+* php-pdo-mysql and/or php-pdo-pgsql
 * php-curl
+* php-iconv
 * php-pcntl (might already be built into your PHP binary)
 * php-posix (on RHEL/CentOS this is php-process, or rh-php7x-php-process)
 * php-sockets (might already be built into your PHP binary)
+* php-mbstring and php-json (already required by Icinga Web 2)
+
+Optional Requirements
+---------------------
+* For IBM DB2 Imports: php-pdo-ibm
+* For MSSQL Imports: php-mssql or php-pdo-dblib (or -sybase on some platforms)
+* For Oracle DB Imports: php-oci8 or php-pdo-oci
+* For Sqlite Imports: php-pdo-sqlite
 
 Database
 --------
@@ -92,7 +102,7 @@ You might want to use a script as follows for this task:
     ICINGAWEB_MODULEPATH="/usr/share/icingaweb2/modules"
     REPO_URL="https://github.com/icinga/icingaweb2-module-director"
     TARGET_DIR="${ICINGAWEB_MODULEPATH}/director"
-    MODULE_VERSION="1.7.2"
+    MODULE_VERSION="1.8.1"
     URL="${REPO_URL}/archive/v${MODULE_VERSION}.tar.gz"
     install -d -m 0755 "${TARGET_DIR}"
     wget -q -O - "$URL" | tar xfz - -C "${TARGET_DIR}" --strip-components 1
@@ -109,7 +119,7 @@ It will be immediately ready for use:
     ICINGAWEB_MODULEPATH="/usr/share/icingaweb2/modules"
     REPO_URL="https://github.com/icinga/icingaweb2-module-director"
     TARGET_DIR="${ICINGAWEB_MODULEPATH}/director"
-    MODULE_VERSION="1.7.2"
+    MODULE_VERSION="1.8.1"
     git clone "${REPO_URL}" "${TARGET_DIR}" --branch v${MODULE_VERSION}
 
 You can now directly use our current GIT master or check out a specific version.

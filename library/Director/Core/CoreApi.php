@@ -123,15 +123,38 @@ class CoreApi implements DeploymentApiInterface
         return $res[$name];
     }
 
-    public function getTicketSalt()
+    /**
+     * Get a PKI ticket for CSR auto-signing
+     *
+     * @param string $cn The host’s common name for which the ticket should be generated
+     *
+     * @return string|null
+     */
+    public function getTicket($cn)
     {
-        // TODO: api must not be the name!
-        $api = $this->getObject('api', 'ApiListeners', array('ticket_salt'));
-        if (isset($api->attrs->ticket_salt)) {
-            return $api->attrs->ticket_salt;
+        $r = $this->client()->post(
+            'actions/generate-ticket',
+            ['cn' => $cn]
+        );
+        if (! $r->succeeded()) {
+            throw new RuntimeException($r->getErrorMessage());
         }
 
-        return null;
+        $ticket = $r->getRaw('ticket');
+        if ($ticket === null) {
+            // RestApiResponse::succeeded() returns true if Icinga 2 reports an error in the results key, e.g.
+            // {
+            //     "results": [
+            //         {
+            //             "code": 500.0,
+            //             "status": "Ticket salt is not configured in ApiListener object"
+            //         }
+            //     ]
+            // }
+            throw new RuntimeException($r->getRaw('status', 'Ticket is empty'));
+        }
+
+        return $ticket;
     }
 
     public function checkHostNow($host)
@@ -704,45 +727,45 @@ constants
             if (array_key_exists($stage, $uncollected)) {
                 continue;
             }
-            $this->client()->delete('config/stages/' . $packageName . '/' . $stage);
+            $this->client()->delete($this->prepareStageUrl($packageName, $stage));
         }
     }
 
-    public function listStageFiles($stage)
+    public function listStageFiles($stage, $packageName = null)
     {
+        if ($packageName === null) {
+            $packageName = $this->getPackageName();
+        }
         return array_keys(
-            $this->client()->get(sprintf(
-                'config/stages/%s/%s',
-                urlencode($this->getPackageName()),
-                urlencode($stage)
-            ))->getResult('name', array('type' => 'file'))
+            $this->client()
+                ->get($this->prepareStageUrl($packageName, $stage))
+                ->getResult('name', ['type' => 'file'])
         );
     }
 
-    public function getStagedFile($stage, $file)
+    public function getStagedFile($stage, $file, $packageName = null)
     {
-        return $this->client()->getRaw(sprintf(
-            'config/files/%s/%s/%s',
-            urlencode($this->getPackageName()),
-            urlencode($stage),
-            urlencode($file)
-        ));
+        if ($packageName === null) {
+            $packageName = $this->getPackageName();
+        }
+        return $this->client()
+            ->getRaw($this->prepareFileUrl($packageName, $stage, $file));
     }
 
     public function hasPackage($name)
     {
         $modules = $this->getPackages();
-        return array_key_exists($name, $modules);
+        return \array_key_exists($name, $modules);
     }
 
     public function createPackage($name)
     {
-        return $this->client()->post('config/packages/' . urlencode($name))->succeeded();
+        return $this->client()->post($this->preparePackageUrl($name))->succeeded();
     }
 
     public function deletePackage($name)
     {
-        return $this->client()->delete('config/packages/' . urlencode($name))->succeeded();
+        return $this->client()->delete($this->preparePackageUrl($name))->succeeded();
     }
 
     public function assertPackageExists($name)
@@ -761,11 +784,9 @@ constants
 
     public function deleteStage($packageName, $stageName)
     {
-        $this->client()->delete(sprintf(
-            'config/stages/%s/%s',
-            rawurlencode($packageName),
-            rawurlencode($stageName)
-        ))->succeeded();
+        $this->client()->delete(
+            $this->prepareStageUrl($packageName, $stageName)
+        )->succeeded();
     }
 
     /**
@@ -797,7 +818,7 @@ constants
      * @param IcingaConfig $config
      * @param Db $db
      * @param null $packageName
-     * @return \Icinga\Module\Director\Data\Db\DbObject
+     * @return DirectorDeploymentLog
      * @throws \Icinga\Module\Director\Exception\DuplicateKeyException
      */
     public function dumpConfig(IcingaConfig $config, Db $db, $packageName = null)
@@ -806,6 +827,7 @@ constants
             $packageName = $db->settings()->get('icinga_package_name');
         }
         $start = microtime(true);
+        /** @var DirectorDeploymentLog $deployment */
         $deployment = DirectorDeploymentLog::create(array(
             // 'config_id'      => $config->id,
             // 'peer_identity'  => $endpoint->object_name,
@@ -826,7 +848,7 @@ constants
 
         $this->assertPackageExists($packageName);
 
-        $response = $this->client()->post('config/stages/' . urlencode($packageName), [
+        $response = $this->client()->post('config/stages/' . \rawurlencode($packageName), [
             'files' => $config->getFileContents()
         ]);
 
@@ -846,7 +868,7 @@ constants
 
         if ($succeeded === 'y') {
             foreach ($hooks as $hook) {
-                $hook->onSuccessfullDump($deployment);
+                $hook->triggerSuccessfulDump($deployment);
             }
         }
 
@@ -874,6 +896,30 @@ constants
             '[..] %d bytes removed by Director [..]',
             $logLen - (strlen($begin) + strlen($end))
         ) . $end;
+    }
+
+    protected function preparePackageUrl($packageName)
+    {
+        return 'config/packages/' . \rawurlencode($packageName);
+    }
+
+    protected function prepareStageUrl($packageName, $stage)
+    {
+        return \sprintf(
+            'config/stages/%s/%s',
+            \rawurlencode($packageName),
+            \rawurlencode($stage)
+        );
+    }
+
+    protected function prepareFileUrl($packageName, $stage, $file)
+    {
+        return \sprintf(
+            'config/files/%s/%s/%s',
+            \rawurlencode($packageName),
+            \rawurlencode($stage),
+            \rawurlencode($file)
+        );
     }
 
     protected function client()

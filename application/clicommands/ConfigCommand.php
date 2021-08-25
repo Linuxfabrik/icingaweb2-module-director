@@ -4,8 +4,10 @@ namespace Icinga\Module\Director\Clicommands;
 
 use Icinga\Application\Benchmark;
 use Icinga\Module\Director\Cli\Command;
+use Icinga\Module\Director\Core\Json;
+use Icinga\Module\Director\Deployment\DeploymentStatus;
 use Icinga\Module\Director\IcingaConfig\IcingaConfig;
-use Icinga\Module\Director\Util;
+use Icinga\Module\Director\Import\SyncUtils;
 
 /**
  * Generate, show and deploy Icinga 2 configuration
@@ -121,11 +123,23 @@ class ConfigCommand extends Command
         }
     }
 
-    public function filesAction()
+    /**
+     * Checks the deployments status
+     */
+    public function deploymentstatusAction()
     {
-    }
+        $db = $this->db();
+        $api = $this->api();
+        $status = new DeploymentStatus($db, $api);
+        $result = $status->getDeploymentStatus($this->params->get('configs'), $this->params->get('activities'));
+        if ($key = $this->params->get('key')) {
+            $result = SyncUtils::getSpecificValue($result, $key);
+        }
 
-    public function fileAction()
-    {
+        if (is_string($result)) {
+            echo "$result\n";
+        } else {
+            echo Json::encode($result, JSON_PRETTY_PRINT) . "\n";
+        }
     }
 }

@@ -180,8 +180,17 @@ CREATE TABLE director_datalist_entry (
     ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
+CREATE TABLE director_datafield_category (
+  id INT(10) UNSIGNED NOT NULL AUTO_INCREMENT,
+  category_name VARCHAR(255) NOT NULL,
+  description TEXT DEFAULT NULL,
+  PRIMARY KEY (id),
+  UNIQUE KEY category_name (category_name)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
 CREATE TABLE director_datafield (
   id INT(10) UNSIGNED NOT NULL AUTO_INCREMENT,
+  category_id INT(10) UNSIGNED DEFAULT NULL,
   varname VARCHAR(64) NOT NULL COLLATE utf8_bin,
   caption VARCHAR(255) NOT NULL,
   description TEXT DEFAULT NULL,
@@ -190,7 +199,12 @@ CREATE TABLE director_datafield (
   format enum ('string', 'json', 'expression'),
   guid CHAR(36) DEFAULT NULL,
   PRIMARY KEY (id),
-  KEY search_idx (varname)
+  KEY search_idx (varname),
+  CONSTRAINT director_datafield_category
+    FOREIGN KEY category (category_id)
+    REFERENCES director_datafield_category (id)
+    ON DELETE RESTRICT
+    ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 CREATE TABLE director_datafield_setting (
@@ -1518,7 +1532,7 @@ CREATE TABLE sync_rule (
     'notification',
     'dependency'
   ) NOT NULL,
-  update_policy ENUM('merge', 'override', 'ignore') NOT NULL,
+  update_policy ENUM('merge', 'override', 'ignore', 'update-only') NOT NULL,
   purge_existing ENUM('y', 'n') NOT NULL DEFAULT 'n',
   filter_expression TEXT DEFAULT NULL,
   sync_state ENUM(
@@ -1878,4 +1892,4 @@ CREATE TABLE icinga_scheduled_downtime_range (
 
 INSERT INTO director_schema_migration
   (schema_version, migration_time)
-  VALUES (168, NOW());
+  VALUES (171, NOW());

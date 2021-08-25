@@ -4,11 +4,13 @@ namespace Icinga\Module\Director\Web\Controller;
 
 use Icinga\Application\Benchmark;
 use Icinga\Data\Paginatable;
+use Icinga\Exception\NotFoundError;
 use Icinga\Exception\ProgrammingError;
 use Icinga\Module\Director\Monitoring;
 use Icinga\Module\Director\Web\Controller\Extension\CoreApi;
 use Icinga\Module\Director\Web\Controller\Extension\DirectorDb;
 use Icinga\Module\Director\Web\Controller\Extension\RestApi;
+use Icinga\Module\Director\Web\Window;
 use Icinga\Security\SecurityException;
 use Icinga\Web\Controller;
 use Icinga\Web\UrlParams;
@@ -44,6 +46,11 @@ abstract class ActionController extends Controller implements ControlsAndContent
      */
     public function init()
     {
+        if (! $this->getRequest()->isApiRequest()
+            && $this->Config()->get('frontend', 'disabled', 'no') === 'yes'
+        ) {
+            throw new NotFoundError('Not found');
+        }
         $this->initializeTranslator();
         Benchmark::measure('Director base Controller init()');
         $this->checkForRestApiRequest();
@@ -59,6 +66,21 @@ abstract class ActionController extends Controller implements ControlsAndContent
     public function getAuth()
     {
         return $this->Auth();
+    }
+
+    /**
+     * @codingStandardsIgnoreStart
+     * @return Window
+     */
+    public function Window()
+    {
+        // @codingStandardsIgnoreEnd
+        if ($this->window === null) {
+            $this->window = new Window(
+                $this->_request->getHeader('X-Icinga-WindowId', Window::UNDEFINED)
+            );
+        }
+        return $this->window;
     }
 
     /**
@@ -166,6 +188,16 @@ abstract class ActionController extends Controller implements ControlsAndContent
         return $this;
     }
 
+    protected function sendUnsupportedMethod()
+    {
+        $method = strtoupper($this->getRequest()->getMethod()) ;
+        $response = $this->getResponse();
+        $this->sendJsonError($response, sprintf(
+            'Method %s is not supported',
+            $method
+        ), 422);  // TODO: check response code
+    }
+
     /**
      * @param string $permission
      * @return $this
@@ -184,7 +216,8 @@ abstract class ActionController extends Controller implements ControlsAndContent
             $viewRenderer = new SimpleViewRenderer();
             $viewRenderer->replaceZendViewRenderer();
             $this->view = $viewRenderer->view;
-            if ($this->getOriginalUrl()->getParam('view') === 'compact') {
+            // Hint -> $this->view->compact is the only way since v2.8.0
+            if ($this->view->compact || $this->getOriginalUrl()->getParam('view') === 'compact') {
                 if ($this->view->controls) {
                     $this->controls()->getAttributes()->add('style', 'display: none;');
                 }

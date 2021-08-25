@@ -536,7 +536,13 @@ abstract class IcingaObject extends DbObject implements IcingaConfigRenderer
                 $this->connection
             );
         } catch (NotFoundError $e) {
-            throw new RuntimeException($e->getMessage(), 0, $e);
+            // Hint: eventually a NotFoundError would be better
+            throw new RuntimeException(sprintf(
+                'Unable to load object referenced from %s "%s", %s',
+                $this->getShortTableName(),
+                $this->getObjectName(),
+                lcfirst($e->getMessage())
+            ), $e->getCode(), $e);
         }
 
         $this->reallySet($name, $object->get('id'));
@@ -2554,7 +2560,7 @@ abstract class IcingaObject extends DbObject implements IcingaConfigRenderer
             $type = 'templateChoiceHost';
         } elseif ($type === 'service_template_choice') {
             $type = 'TemplateChoiceService';
-        } elseif ($type === 'scheduled_downtime') {
+        } elseif ($type === 'scheduled_downtime' || $type === 'scheduled-downtime') {
             $type = 'ScheduledDowntime';
         }
 
@@ -2727,9 +2733,7 @@ abstract class IcingaObject extends DbObject implements IcingaConfigRenderer
         }
 
         $plain = (array) $object->toPlainObject(false, false);
-        unset($plain['vars']);
-        unset($plain['groups']);
-        unset($plain['imports']);
+        unset($plain['vars'], $plain['groups'], $plain['imports']);
         foreach ($plain as $p => $v) {
             if ($v === null) {
                 // We want default values, but no null values

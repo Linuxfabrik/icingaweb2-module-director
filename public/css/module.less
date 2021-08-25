@@ -7,8 +7,34 @@ div.action-bar a:focus, .tabs a:focus {
   }
 }
 
+table.common-table td {
+  padding-top: 0.2em;
+  padding-bottom: 0.2em;
+  vertical-align: middle;
+
+  p {
+    word-break: break-word;
+  }
+}
+
+#layout.minimal-layout table.common-table td {
+  padding-top: 0.5em;
+  padding-bottom: 0.5em;
+}
+
+table.common-table thead th {
+  border-bottom: 1px solid @text-color;
+}
+table.common-table tbody td {
+  border-bottom: 1px solid @gray-lighter;
+}
+
 a:before {
   text-decoration: none;
+}
+
+form {
+  max-width: 68em;
 }
 
 form:focus {
@@ -140,12 +166,17 @@ table.common-table {
   pre {
     margin: 0;
     padding: 0.2em;
-    max-height: 18em;
-    background: @gray-lightest;
+    max-height: 10em;
+    background: none;
     overflow: auto;
     word-break: keep-all;
     white-space: pre;
     display: inline-block;
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+    &::-webkit-scrollbar {
+      display: none;
+    }
   }
 }
 
@@ -422,6 +453,9 @@ form dl {
     text-decoration: line-through;
   }
 }
+.strike-links span.ro-service {
+  text-decoration: line-through;
+}
 
 // TODO: figure out whether form.editor and filter-related CSS is still required
 div.filter > form.search, div.filter > a {
@@ -453,7 +487,7 @@ form.editor {
   }
 }
 
-form.quicksearch {
+form.gipfl-quicksearch {
   display: block;
   input.search {
     width: 8em;
@@ -812,16 +846,6 @@ ul.main-actions {
 
 }
 
-#layout.compact-layout.twocols table.Differences,
-#layout.default-layout.twocols table.Differences {
-  th {
-    font-size: 0.75em;
-  }
-  td {
-    font-size: 0.916em;
-  }
-}
-
 fieldset {
     margin: 0;
     padding: 0 0 1.5em 0;
@@ -938,14 +962,21 @@ form.db-selector {
   }
 }
 
-#layout.twocols &#col1 {
+// Adjustments for the legacy layout to keep backwards compatibility
+#layout.twocols > #main &#col1 {
   width: 50%;
 }
-#layout.twocols &#col2 {
+#layout.twocols > #main &#col2 {
   width: 50%;
 }
-#layout.twocols &#col1 + #col2 {
+#layout.twocols > #main &#col1 + #col2 {
   width: 50%;
+}
+
+// Adjustments for the flexbox layout
+#layout.twocols > #content-wrapper &#col2,
+#layout.twocols > #content-wrapper &#col1 + #col2 {
+  flex-grow: 1;
 }
 
 form dd {
@@ -1079,79 +1110,11 @@ span.error {
   }
 }
 
-p.error:not(.state-hint) {
-    color: white;
-    padding: 1em 2em;
-    background-color: @colorCritical;
-    font-weight: bold;
+p.legacy-error {
+  color: white;
+  padding: 1em 2em;
+  background-color: @colorCritical;
 
-    a {
-        color: inherit;
-        text-decoration: underline;
-    }
-}
-
-p.warning:not(.state-hint) {
-    color: white;
-    padding: 1em 2em;
-    background-color: @colorWarning;
-    font-weight: bold;
-
-    a {
-        color: inherit;
-        text-decoration: underline;
-    }
-}
-
-p.information:not(.state-hint) {
-    color: white;
-    padding: 1em 2em;
-    background-color: @colorOk;
-    font-weight: bold;
-
-    a {
-        color: inherit;
-        text-decoration: underline;
-    }
-}
-
-p.state-hint {
-  border: 1px solid @text-color;
-  padding: 0.5em;
-  line-height: 2em;
-  max-width: 60em;
-  border-left-width: 3em;
-  &:before {
-    position: relative;
-    margin-left: -1.5em;
-    margin-right: 0.5em;
-    height: 100%;
-    vertical-align: middle;
-    font-family: 'ifont';
-    color: white;
-    font-size: 2em;
-  }
-  &.ok {
-    border-color: @color-ok;
-  }
-  &.warning {
-    border-color: @color-warning;
-  }
-  &.error {
-    border-color: @color-critical;
-  }
-  &.critical:before, &.error:before {
-    content: '\e885';
-  }
-  &.warning:before {
-    content: '\e885';
-  }
-  &.ok:before {
-    content: '\e803';
-  }
-  a {
-    text-decoration: underline;
-  }
 }
 
 table th.actions, table td.actions {
@@ -1453,6 +1416,132 @@ input[type=submit].icon-button {
   }
 }
 
+/** BEGIN breadcrumb **/
+// Hint: .badges is unused right now
+.breadcrumb {
+  list-style: none;
+  overflow: hidden;
+  padding: 0;
+
+  .badges {
+    display: inline-block;
+    padding: 0 0 0 0.5em;
+    .badge {
+      line-height: 1.25em;
+      font-size: 0.8em;
+      border: 1px solid white;
+      margin: -0.25em 1px 0 0;
+    }
+  }
+}
+
+.breadcrumb {
+  > .critical            a { background: @colorCritical; }
+  > .critical.handled    a { background: @colorCriticalHandled; }
+  > .unknown             a { background: @colorUnknown; }
+  > .unknown.handled     a { background: @colorUnknownHandled; }
+  > .warning             a { background: @colorWarning; }
+  > .warning.handled     a { background: @colorWarningHandled; }
+  > .ok                  a { background: @colorOk; }
+}
+
+.breadcrumb {
+  > .critical            a:after { border-left-color: @colorCritical; }
+  > .critical.handled    a:after { border-left-color: @colorCriticalHandled; }
+  > .unknown             a:after { border-left-color: @colorUnknown; }
+  > .unknown.handled     a:after { border-left-color: @colorUnknownHandled; }
+  > .warning             a:after { border-left-color: @colorWarning; }
+  > .warning.handled     a:after { border-left-color: @colorWarningHandled; }
+  > .ok                  a:after { border-left-color: @colorOk; }
+}
+
+.breadcrumb:after {
+  content:'';
+  display:block;
+  clear: both;
+}
+.breadcrumb li {
+  float: left;
+  cursor: pointer;
+  user-select: none;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+
+}
+.breadcrumb li a {
+  // color: white;
+  color: @icinga-blue;
+  margin: 0;
+  // font-size: 1.2em;
+  text-decoration: none;
+  padding-left: 2em;
+  // line-height: 1.5em;
+  // background: @icinga-blue;
+  border: 1px solid @icinga-blue;
+  border-top: none;
+  border-bottom: none;
+  position: relative;
+  display: block;
+  float: left;
+  &:focus {
+    outline: none;
+  }
+  &:hover {
+    text-decoration: none;
+  }
+}
+.action-bar .breadcrumb li a {
+  padding-left: 2em;
+}
+
+.breadcrumb li a:before, .breadcrumb li a:after {
+  content: " ";
+  display: block;
+  width: 0;
+  height: 0;
+  border-top: 1.3em solid transparent;
+  border-bottom: 1.2em solid transparent;
+  position: absolute;
+  margin-top: -1.2em;
+  top: 50%;
+  left: 100%;
+}
+
+.breadcrumb li a:before {
+  border-left: 1.2em solid white;
+  border-left: 1.2em solid @icinga-blue;
+  margin-left: 1px;
+  z-index: 1;
+}
+
+.breadcrumb li a:after {
+  border-left: 1.2em solid @icinga-blue;
+  border-left: 1.2em solid white;
+  z-index: 2;
+}
+
+.breadcrumb li:first-child a {
+  padding-left: 1em;
+  padding-right: 0.5em;
+}
+.breadcrumb li:last-child a {
+  cursor: default;
+}
+.breadcrumb li:last-child a:hover {
+
+}
+
+.breadcrumb li:not(:last-child) a:hover { background: @text-color; color: white; }
+.breadcrumb li:not(:last-child) a:hover:after { border-left-color: @text-color; }
+
+.breadcrumb li a:focus {
+  text-decoration: underline;
+}
+/** END of breadcrumb **/
+
+
+
 ul.filter-root {
     margin-top: 0;
     width: 100%;
@@ -1686,118 +1775,14 @@ h2.action-delete::before {
   color: @color-critical;
 }
 
-/** php-diff **/
-
-.Differences {
-    width: 100%;
-    table-layout: fixed;
-    empty-cells: show;
-}
-
-.Differences thead {
-    display: none;
-}
-
-.Differences thead th {
-    text-align: left;
-    padding-left: 4 / 14 * 16em;
-}
-.Differences tbody th {
-    text-align: right;
-    width: 4em;
-    padding: 1px 2px;
-    border-right: 1px solid @gray-light;
-    background: @gray-lightest;
+/* Special components */
+table.table-basket-changes {
+  min-width: 18em;
+  max-width: 100%;
+  th {
+    width: 80%;
     font-weight: normal;
-    vertical-align: top;
-}
-
-.Differences tbody td {
-    width: 50%;
-    .preformatted();
-    word-break: break-all;
-}
-
-@color-diff-ins: #bfb;
-@color-diff-del: #faa;
-@color-diff-changed-old: #fdd;
-@color-diff-changed-new: #efe;
-
-.DifferencesSideBySide {
-    ins, del {
-        text-decoration: none;
-    }
-
-    .ChangeInsert {
-        td.Left {
-            background: @gray-lighter;
-        }
-        td.Right {
-            background: @color-diff-ins;
-        }
-    }
-
-    .ChangeDelete {
-        td.Left {
-            background: @color-diff-del;
-        }
-        td.Right {
-            background: @gray-lighter;
-        }
-    }
-
-    .ChangeReplace {
-        td.Left {
-            background: @color-diff-changed-old;
-            del {
-                background: @color-diff-del;
-            }
-        }
-
-        td.Right {
-            background: @color-diff-changed-new;
-            ins {
-                background: @color-diff-ins;
-            }
-        }
-
-    }
-}
-
-.Differences .Skipped {
-    background: @gray-lightest;
-}
-
-.DifferencesInline .ChangeReplace .Left,
-.DifferencesInline .ChangeDelete .Left {
-    background: #fdd;
-}
-
-.DifferencesInline .ChangeReplace .Right,
-.DifferencesInline .ChangeInsert .Right {
-    background: #dfd;
-}
-
-.DifferencesInline .ChangeReplace ins {
-    background: #9e9;
-}
-
-.DifferencesInline .ChangeReplace del {
-    background: #e99;
-}
-/** END of php-diff **/
-
-.DifferencesInline {
-  tr td:last-child {
-    width: 90%;
-  }
-  tr th:first-child {
-    width: 5%;
-  }
-  tr th:nth-child(2) {
-    width: 5%;
-  }
-  ins, del {
-    text-decoration: none;
+    text-align: left;
+    min-width: 10em;
   }
 }

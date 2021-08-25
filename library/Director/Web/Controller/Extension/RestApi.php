@@ -36,6 +36,21 @@ trait RestApi
     }
 
     /**
+     * @return bool
+     */
+    protected function sendNotFoundUnlessRestApi()
+    {
+        /** @var \Icinga\Web\Request $request */
+        $request = $this->getRequest();
+        if ($request->isApiRequest()) {
+            return false;
+        } else {
+            $this->sendJsonError($this->getResponse(), 'Not found', 404);
+            return true;
+        }
+    }
+
+    /**
      * @throws AuthenticationException
      */
     protected function assertApiPermission()
@@ -68,7 +83,7 @@ trait RestApi
     protected function sendJson(Response $response, $object)
     {
         $response->setHeader('Content-Type', 'application/json', true);
-        echo json_encode($object, JSON_PRETTY_PRINT) . "\n";
+        echo json_encode($object, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) . "\n";
     }
 
     /**

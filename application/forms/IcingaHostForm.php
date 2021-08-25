@@ -131,7 +131,7 @@ class IcingaHostForm extends DirectorObjectForm
                 ['HtmlTag', ['tag' => 'dl']],
                 'Fieldset',
             ],
-            'order'  => 80,
+            'order'  => self::GROUP_ORDER_CLUSTERING,
             'legend' => $this->translate('Icinga Agent and zone settings')
         ]);
 
@@ -195,7 +195,9 @@ class IcingaHostForm extends DirectorObjectForm
      */
     protected function addGroupsElement()
     {
-        if ($this->hasHostGroupRestriction()) {
+        if ($this->hasHostGroupRestriction()
+            && ! $this->getAuth()->hasPermission('director/groups-for-restricted-hosts')
+        ) {
             return $this;
         }
 
@@ -228,12 +230,14 @@ class IcingaHostForm extends DirectorObjectForm
                 $links->addAttributes(['class' => 'strike-links']);
                 /** @var BaseHtmlElement $link */
                 foreach ($links->getContent() as $link) {
-                    $link->addAttributes([
-                        'title' => $this->translate(
-                            'Group has been inherited, but will be overridden'
-                            . ' by locally assigned group(s)'
-                        )
-                    ]);
+                    if ($link instanceof BaseHtmlElement) {
+                        $link->addAttributes([
+                            'title' => $this->translate(
+                                'Group has been inherited, but will be overridden'
+                                . ' by locally assigned group(s)'
+                            )
+                        ]);
+                    }
                 }
             }
             $this->addElement('simpleNote', 'inherited_groups', [
@@ -268,6 +272,9 @@ class IcingaHostForm extends DirectorObjectForm
     {
         $links = [];
         foreach ($groups as $name) {
+            if (! empty($links)) {
+                $links[] = ', ';
+            }
             $links[] = Link::create(
                 $name,
                 'director/hostgroup',
@@ -278,7 +285,7 @@ class IcingaHostForm extends DirectorObjectForm
 
         return Html::tag('span', [
             'style' => 'line-height: 2.5em; padding-left: 0.5em'
-        ], $links)->setSeparator(', ');
+        ], $links);
     }
 
     protected function getAppliedGroups()

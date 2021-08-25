@@ -2,10 +2,13 @@
 
 namespace Icinga\Module\Director\Controllers;
 
+use gipfl\Diff\HtmlRenderer\SideBySideDiff;
+use gipfl\Diff\PhpDiff;
+use gipfl\Web\Widget\Hint;
 use Icinga\Data\Filter\Filter;
 use Icinga\Exception\IcingaException;
 use Icinga\Exception\NotFoundError;
-use Icinga\Module\Director\ConfigDiff;
+use Icinga\Module\Director\Deployment\DeploymentStatus;
 use Icinga\Module\Director\Forms\DeployConfigForm;
 use Icinga\Module\Director\Forms\SettingsForm;
 use Icinga\Module\Director\IcingaConfig\IcingaConfig;
@@ -15,7 +18,6 @@ use Icinga\Module\Director\Web\Table\ActivityLogTable;
 use Icinga\Module\Director\Web\Table\ConfigFileDiffTable;
 use Icinga\Module\Director\Web\Table\DeploymentLogTable;
 use Icinga\Module\Director\Web\Table\GeneratedConfigFileTable;
-use Icinga\Module\Director\Util;
 use Icinga\Module\Director\Web\Controller\ActionController;
 use Icinga\Module\Director\Web\Tabs\InfraTabs;
 use Icinga\Module\Director\Web\Widget\ActivityLogInfo;
@@ -50,15 +52,12 @@ class ConfigController extends ActionController
         $this->addTitle($this->translate('Deployments'));
         try {
             if (DirectorDeploymentLog::hasUncollected($this->db())) {
-                $this->setAutorefreshInterval(3);
-                $this->api()->collectLogFiles($this->db());
+                $this->setAutorefreshInterval(2);
             } else {
                 $this->setAutorefreshInterval(20);
             }
         } catch (Exception $e) {
-            $this->content()->prepend(
-                Html::tag('p', ['class' => 'warning'], $e->getMessage())
-            );
+            $this->content()->prepend(Hint::warning($e->getMessage()));
             // No problem, Icinga might be reloading
         }
 
@@ -124,6 +123,19 @@ class ConfigController extends ActionController
         } else {
             $this->deploymentFailed($checksum);
         }
+    }
+
+    public function deploymentStatusAction()
+    {
+        if ($this->sendNotFoundUnlessRestApi()) {
+            return;
+        }
+        $db = $this->db();
+        $api = $this->api();
+        $status = new DeploymentStatus($db, $api);
+        $result = $status->getDeploymentStatus($this->params->get('configs'), $this->params->get('activities'));
+
+        $this->sendJson($this->getResponse(), (object) $result);
     }
 
     /**
@@ -404,10 +416,10 @@ class ConfigController extends ActionController
         $this
             ->addTitle($this->translate('Config file "%s"'), $filename)
             ->addSingleTab($this->translate('Diff'))
-            ->content()->add(ConfigDiff::create(
+            ->content()->add(new SideBySideDiff(new PhpDiff(
                 $left->getFile($filename),
                 $right->getFile($filename)
-            ));
+            )));
     }
 
     /**

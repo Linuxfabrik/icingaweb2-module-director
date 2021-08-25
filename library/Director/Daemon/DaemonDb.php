@@ -11,10 +11,10 @@ use Icinga\Module\Director\Db\Migrations;
 use ipl\Stdlib\EventEmitter;
 use React\EventLoop\LoopInterface;
 use React\Promise\Deferred;
-use React\Promise\FulfilledPromise;
-use React\Promise\RejectedPromise;
 use RuntimeException;
 use SplObjectStorage;
+use function React\Promise\reject;
+use function React\Promise\resolve;
 
 class DaemonDb
 {
@@ -110,7 +110,7 @@ class DaemonDb
             $this->emitStatus('no configuration');
             $this->dbConfig = $config;
 
-            return new FulfilledPromise();
+            return resolve();
         } else {
             $this->emitStatus('configuration loaded');
             $this->dbConfig = $config;
@@ -123,7 +123,7 @@ class DaemonDb
     {
         if ($this->connection !== null) {
             Logger::error('Trying to establish a connection while being connected');
-            return new RejectedPromise();
+            return reject();
         }
         $callback = function () use ($config) {
             $this->reallyEstablishConnection($config);
@@ -157,8 +157,8 @@ class DaemonDb
         }
         $this->wipeOrphanedInstances($connection);
         if ($this->hasAnyOtherActiveInstance($connection)) {
-            $this->emitStatus('locked by other instance', 'error');
-            throw new RuntimeException('DB is locked by a running daemon instance');
+            $this->emitStatus('locked by other instance', 'warning');
+            throw new RuntimeException('DB is locked by a running daemon instance, will retry');
         }
         $this->startupSchemaVersion = $migrations->getLastMigrationNumber();
         $this->details->set('schema_version', $this->startupSchemaVersion);
@@ -241,7 +241,7 @@ class DaemonDb
             }
         }
 
-        return new FulfilledPromise();
+        return resolve();
     }
 
     /**
@@ -250,7 +250,7 @@ class DaemonDb
     public function disconnect()
     {
         if (! $this->connection) {
-            return new FulfilledPromise();
+            return resolve();
         }
         if ($this->pendingDisconnect) {
             return $this->pendingDisconnect->promise();

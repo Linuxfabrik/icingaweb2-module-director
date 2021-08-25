@@ -9,8 +9,8 @@ use Icinga\Module\Director\Db;
 use Icinga\Module\Director\Objects\DirectorJob;
 use React\ChildProcess\Process;
 use React\EventLoop\LoopInterface;
-use React\Promise\FulfilledPromise;
 use React\Promise\Promise;
+use function React\Promise\resolve;
 
 class JobRunner implements DbBasedComponent
 {
@@ -74,7 +74,7 @@ class JobRunner implements DbBasedComponent
         }
         $this->timer = $this->loop->addPeriodicTimer($this->checkInterval, $check);
 
-        return new FulfilledPromise();
+        return resolve();
     }
 
     /**
@@ -153,7 +153,7 @@ class JobRunner implements DbBasedComponent
     {
         $id = \array_shift($this->scheduledIds);
         try {
-            $job =  DirectorJob::loadWithAutoIncId((int) $id, $this->db);
+            $job = DirectorJob::loadWithAutoIncId((int) $id, $this->db);
             if ($job->shouldRun()) {
                 $this->runJob($job);
                 return true;

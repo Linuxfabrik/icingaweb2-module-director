@@ -3,6 +3,7 @@
 namespace Icinga\Module\Director\Web\Form;
 
 use Exception;
+use gipfl\IcingaWeb2\Url;
 use Icinga\Authentication\Auth;
 use Icinga\Module\Director\Db;
 use Icinga\Module\Director\Data\Db\DbObject;
@@ -15,12 +16,24 @@ use Icinga\Module\Director\Objects\IcingaTemplateChoice;
 use Icinga\Module\Director\Objects\IcingaCommand;
 use Icinga\Module\Director\Objects\IcingaObject;
 use Icinga\Module\Director\Util;
+use Icinga\Module\Director\Web\Form\Element\ExtensibleSet;
 use Icinga\Module\Director\Web\Form\Validate\NamePattern;
 use Zend_Form_Element as ZfElement;
 use Zend_Form_Element_Select as ZfSelect;
 
 abstract class DirectorObjectForm extends DirectorForm
 {
+    const GROUP_ORDER_OBJECT_DEFINITION = 20;
+    const GROUP_ORDER_RELATED_OBJECTS = 25;
+    const GROUP_ORDER_ASSIGN = 30;
+    const GROUP_ORDER_CHECK_EXECUTION = 40;
+    const GROUP_ORDER_CUSTOM_FIELDS = 50;
+    const GROUP_ORDER_CUSTOM_FIELD_CATEGORIES = 60;
+    const GROUP_ORDER_EVENT_FILTERS = 700;
+    const GROUP_ORDER_EXTRA_INFO = 750;
+    const GROUP_ORDER_CLUSTERING = 800;
+    const GROUP_ORDER_BUTTONS = 1000;
+
     /** @var IcingaObject */
     protected $object;
 
@@ -286,7 +299,7 @@ abstract class DirectorObjectForm extends DirectorForm
     }
 
     // TODO: move to a subform
-    protected function handleRanges(IcingaObject $object, & $values)
+    protected function handleRanges(IcingaObject $object, &$values)
     {
         if (! $object->supportsRanges()) {
             return;
@@ -319,7 +332,7 @@ abstract class DirectorObjectForm extends DirectorForm
         return $this->addElementsToGroup(
             $elements,
             'check_execution',
-            60,
+            self::GROUP_ORDER_CHECK_EXECUTION,
             $this->translate('Check execution')
         );
     }
@@ -369,7 +382,7 @@ abstract class DirectorObjectForm extends DirectorForm
         return $this->displayGroups[$group];
     }
 
-    protected function handleProperties(DbObject $object, & $values)
+    protected function handleProperties(DbObject $object, &$values)
     {
         if ($this->hasBeenSent()) {
             foreach ($values as $key => $value) {
@@ -570,7 +583,7 @@ abstract class DirectorObjectForm extends DirectorForm
                 array('HtmlTag', array('tag' => 'dl')),
                 'Fieldset',
             ),
-            'order' => 20,
+            'order' => self::GROUP_ORDER_OBJECT_DEFINITION,
             'legend' => $this->translate('Main properties')
         ));
 
@@ -616,12 +629,15 @@ abstract class DirectorObjectForm extends DirectorForm
             if (is_bool($inherited)) {
                 $inherited = $inherited ? 'y' : 'n';
             }
-            if (array_key_exists($inherited, $multi)) {
+            if (is_scalar($inherited) && array_key_exists($inherited, $multi)) {
                 $multi[null] = $multi[$inherited] . sprintf($txtInherited, $inheritedFrom);
             } else {
                 $multi[null] = $this->translate($this->translate('- inherited -'));
             }
             $el->setMultiOptions($multi);
+        } elseif ($el instanceof ExtensibleSet) {
+            $el->setAttrib('inherited', $inherited);
+            $el->setAttrib('inheritedFrom', $inheritedFrom);
         } else {
             if (is_string($inherited) || is_int($inherited)) {
                 $el->setAttrib('placeholder', $inherited . sprintf($txtInherited, $inheritedFrom));
@@ -670,9 +686,14 @@ abstract class DirectorObjectForm extends DirectorForm
         $object = $this->object();
 
         if ($object instanceof IcingaObject) {
+            $params = $object->getUrlParams();
+            $url = Url::fromPath($this->getAction());
+            if ($url->hasParam('dbResourceName')) {
+                $params['dbResourceName'] = $url->getParam('dbResourceName');
+            }
             $this->setSuccessUrl(
                 'director/' . strtolower($this->getObjectShortClassName()),
-                $object->getUrlParams()
+                $params
             );
         } elseif ($object->hasProperty('id')) {
             $this->setSuccessUrl($this->getSuccessUrl()->with('id', $object->getProperty('id')));
@@ -752,17 +773,17 @@ abstract class DirectorObjectForm extends DirectorForm
         return $this->objectName;
     }
 
-    protected function removeFromSet(& $set, $key)
+    protected function removeFromSet(&$set, $key)
     {
         unset($set[$key]);
     }
 
-    protected function moveUpInSet(& $set, $key)
+    protected function moveUpInSet(&$set, $key)
     {
         list($set[$key - 1], $set[$key]) = array($set[$key], $set[$key - 1]);
     }
 
-    protected function moveDownInSet(& $set, $key)
+    protected function moveDownInSet(&$set, $key)
     {
         list($set[$key + 1], $set[$key]) = array($set[$key], $set[$key + 1]);
     }
@@ -1541,7 +1562,7 @@ abstract class DirectorObjectForm extends DirectorForm
                 array('HtmlTag', array('tag' => 'dl')),
                 'Fieldset',
             ),
-            'order'  => 75,
+            'order'  => self::GROUP_ORDER_EXTRA_INFO,
             'legend' => $this->translate('Additional properties')
         ));
 
@@ -1574,7 +1595,7 @@ abstract class DirectorObjectForm extends DirectorForm
                 array('HtmlTag', array('tag' => 'dl')),
                 'Fieldset',
             ),
-            'order'  => 30,
+            'order'  => self::GROUP_ORDER_ASSIGN,
             'legend' => $this->translate('Assign where')
         ));
 
@@ -1643,7 +1664,7 @@ abstract class DirectorObjectForm extends DirectorForm
                 array('HtmlTag', array('tag' => 'dl')),
                 'Fieldset',
             ),
-            'order' =>70,
+            'order' => self::GROUP_ORDER_EVENT_FILTERS,
             'legend' => $this->translate('State and transition type filters')
         ));
 

@@ -2,8 +2,10 @@
 
 namespace Icinga\Module\Director\Controllers;
 
+use Exception;
 use Icinga\Module\Director\Forms\ImportRowModifierForm;
 use Icinga\Module\Director\Forms\ImportSourceForm;
+use Icinga\Module\Director\Hook\ImportSourceHook;
 use Icinga\Module\Director\Web\ActionBar\AutomationObjectActionBar;
 use Icinga\Module\Director\Web\Controller\ActionController;
 use Icinga\Module\Director\Objects\ImportSource;
@@ -15,6 +17,7 @@ use Icinga\Module\Director\Web\Tabs\ImportsourceTabs;
 use Icinga\Module\Director\Web\Widget\ImportSourceDetails;
 use InvalidArgumentException;
 use gipfl\IcingaWeb2\Link;
+use ipl\Html\Error;
 
 class ImportsourceController extends ActionController
 {
@@ -142,11 +145,58 @@ class ImportsourceController extends ActionController
             $this->translate('Import source preview: %s'),
             $source->get('source_name')
         );
+        $fetchUrl = clone($this->url());
 
-        $this->actions()->add(Link::create('[..]', '#', null, [
+        $this->actions()->add(Link::create(
+            $this->translate('Download JSON'),
+            $fetchUrl->setPath('director/importsource/fetch'),
+            null,
+            [
+                'target' => '_blank',
+                'class'  => 'icon-download',
+            ]
+        ))->add(Link::create('[..]', '#', null, [
             'onclick' => 'javascript:$("table.raw-data-table").toggleClass("collapsed");'
         ]));
-        (new ImportsourceHookTable())->setImportSource($source)->renderTo($this);
+        try {
+            (new ImportsourceHookTable())->setImportSource($source)->renderTo($this);
+        } catch (Exception $e) {
+            $this->content()->add(Error::show($e));
+        }
+    }
+
+    /**
+     * @throws \Icinga\Exception\ConfigurationError
+     * @throws \Icinga\Exception\NotFoundError
+     * @throws \Icinga\Module\Director\Exception\DuplicateKeyException
+     */
+    public function fetchAction()
+    {
+        $response = $this->getResponse();
+        try {
+            $source = $this->getImportSource();
+            $source->checkForChanges();
+            $hook = ImportSourceHook::forImportSource($source);
+            $data = $hook->fetchData();
+            $source->applyModifiers($data);
+
+            $filename = sprintf(
+                "director-importsource-%d_%s.json",
+                $this->getParam('id'),
+                date('YmdHis')
+            );
+            $response->setHeader('Content-Type', 'application/json', true);
+            $response->setHeader('Content-disposition', "attachment; filename=$filename", true);
+            $response->sendHeaders();
+            $this->sendJson($this->getResponse(), $data);
+        } catch (Exception $e) {
+            $this->sendJsonError($response, $e->getMessage());
+        }
+        // TODO: this is not clean
+        if (\ob_get_level()) {
+            \ob_end_flush();
+        }
+        exit;
     }
 
     /**

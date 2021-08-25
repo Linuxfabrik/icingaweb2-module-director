@@ -3,6 +3,9 @@
 use Icinga\Application\Icinga;
 use Icinga\Web\Window;
 
+if ($this->getConfig()->get('frontend', 'disabled', 'no') === 'yes') {
+    return;
+}
 $this->providePermission('director/api', $this->translate('Allow to access the director API'));
 $this->providePermission('director/audit', $this->translate('Allow to access the full audit log'));
 $this->providePermission(
@@ -38,6 +41,10 @@ $this->provideRestriction(
         'Limit access to the given comma-separated list of hostgroups'
     )
 );
+$this->providePermission(
+    'director/groups-for-restricted-hosts',
+    $this->translate('Allow users with Hostgroup restrictions to access the Groups field')
+);
 
 $this->provideRestriction(
     'director/service/apply/filter-by-name',
@@ -71,7 +78,7 @@ $this->provideRestriction(
 );
 
 $this->provideRestriction(
-    'director/dbresources/use',
+    'director/db_resource',
     $this->translate('Allow to use only these db resources (comma separated list)')
 );
 */

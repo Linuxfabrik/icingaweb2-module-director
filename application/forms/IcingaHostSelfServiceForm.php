@@ -83,6 +83,23 @@ class IcingaHostSelfServiceForm extends DirectorForm
         return $this->template;
     }
 
+    public function listMissingRequiredFields()
+    {
+        $result = [];
+        foreach ($this->getElements() as $element) {
+            if (in_array('isEmpty', $element->getErrors())) {
+                $result[] = $element->getName();
+            }
+        }
+
+        return $result;
+    }
+
+    public function isMissingRequiredFields()
+    {
+        return count($this->listMissingRequiredFields()) > 0;
+    }
+
     public function onSuccess()
     {
         $db = $this->getDb();
@@ -108,7 +125,9 @@ class IcingaHostSelfServiceForm extends DirectorForm
 
             $propertyNames = ['display_name', 'address', 'address6'];
             foreach ($propertyNames as $property) {
-                $host->set($property, $this->getValue($property));
+                if (\strlen($value = $this->getValue($property)) > 0) {
+                    $host->set($property, $value);
+                }
             }
         } else {
             $host = IcingaHost::create(array_filter($this->getValues(), 'strlen'), $db);

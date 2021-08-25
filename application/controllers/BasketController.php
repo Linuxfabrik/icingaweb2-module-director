@@ -2,16 +2,19 @@
 
 namespace Icinga\Module\Director\Controllers;
 
-use gipfl\IcingaWeb2\Link;
-use gipfl\IcingaWeb2\Widget\NameValueTable;
 use Exception;
+use gipfl\Diff\HtmlRenderer\InlineDiff;
+use gipfl\Diff\PhpDiff;
+use gipfl\IcingaWeb2\Link;
+use gipfl\Web\Table\NameValueTable;
+use gipfl\Web\Widget\Hint;
 use Icinga\Date\DateFormatter;
-use Icinga\Module\Director\ConfigDiff;
 use Icinga\Module\Director\Core\Json;
 use Icinga\Module\Director\Db;
 use Icinga\Module\Director\DirectorObject\Automation\Basket;
 use Icinga\Module\Director\DirectorObject\Automation\BasketSnapshot;
 use Icinga\Module\Director\DirectorObject\Automation\BasketSnapshotFieldResolver;
+use Icinga\Module\Director\DirectorObject\Automation\CompareBasketObject;
 use Icinga\Module\Director\Forms\AddToBasketForm;
 use Icinga\Module\Director\Forms\BasketCreateSnapshotForm;
 use Icinga\Module\Director\Forms\BasketForm;
@@ -57,9 +60,7 @@ class BasketController extends ActionController
         $this->basketTabs()->activate('show');
         $this->addTitle($basket->get('basket_name'));
         if ($basket->isEmpty()) {
-            $this->content()->add(Html::tag('p', [
-                'class' => 'information'
-            ], $this->translate('This basket is empty')));
+            $this->content()->add(Hint::info($this->translate('This basket is empty')));
         }
         $this->content()->add(
             (new BasketForm())->setObject($basket)->handleRequest()
@@ -180,7 +181,7 @@ class BasketController extends ActionController
                 'attachment; filename=Director-Basket_%s_%s.json',
                 str_replace([' ', '"'], ['_', '_'], iconv(
                     'UTF-8',
-                    'ISO-8859-11//IGNORE',
+                    'ISO-8859-1//IGNORE',
                     $basket->get('basket_name')
                 )),
                 substr($snapSum, 0, 7)
@@ -255,7 +256,10 @@ class BasketController extends ActionController
                 continue;
             }
             $table = new NameValueTable();
-            $table->setAttribute('data-base-target', '_next');
+            $table->addAttributes([
+                'class' => ['table-basket-changes', 'table-row-selectable'],
+                'data-base-target' => '_next',
+            ]);
             foreach ($objects as $key => $object) {
                 $linkParams = [
                     'name'     => $basket->get('basket_name'),
@@ -290,7 +294,7 @@ class BasketController extends ActionController
                     if (isset($object->originalId)) {
                         unset($object->originalId);
                     }
-                    $hasChanged = Json::encode($currentExport) !== Json::encode($object);
+                    $hasChanged = ! CompareBasketObject::equals($currentExport, $object);
                     $table->addNameValueRow(
                         $key,
                         $hasChanged
@@ -304,7 +308,12 @@ class BasketController extends ActionController
                 } catch (Exception $e) {
                     $table->addNameValueRow(
                         $key,
-                        $e->getMessage()
+                        Html::tag('a', sprintf(
+                            '%s (%s:%d)',
+                            $e->getMessage(),
+                            basename($e->getFile()),
+                            $e->getLine()
+                        ))
                     );
                 }
             }
@@ -330,9 +339,7 @@ class BasketController extends ActionController
         $key = $this->params->get('key');
 
         $this->addTitle($this->translate('Single Object Diff'));
-        $this->content()->add(Html::tag('p', [
-            'class' => 'information'
-        ], Html::sprintf(
+        $this->content()->add(Hint::info(Html::sprintf(
             $this->translate('Comparing %s "%s" from Snapshot "%s" to current config'),
             $type,
             $key,
@@ -371,21 +378,28 @@ class BasketController extends ActionController
         }
         $fieldResolver = new BasketSnapshotFieldResolver($objects, $connection);
         $objectFromBasket = $objects->$type->$key;
+        unset($objectFromBasket->originalId);
+        CompareBasketObject::normalize($objectFromBasket);
+        $objectFromBasket = Json::encode($objectFromBasket, JSON_PRETTY_PRINT);
         $current = BasketSnapshot::instanceByIdentifier($type, $key, $connection);
         if ($current === null) {
             $current = '';
         } else {
             $exported = $current->export();
             $fieldResolver->tweakTargetIds($exported);
+            unset($exported->originalId);
+            CompareBasketObject::normalize($exported);
             $current = Json::encode($exported, JSON_PRETTY_PRINT);
         }
 
-        $this->content()->add(
-            ConfigDiff::create(
-                $current,
-                Json::encode($objectFromBasket, JSON_PRETTY_PRINT)
-            )->setHtmlRenderer('Inline')
-        );
+        if ($current === $objectFromBasket) {
+            $this->content()->add([
+                Hint::ok('Basket equals current object'),
+                Html::tag('pre', $current)
+            ]);
+        } else {
+            $this->content()->add(new InlineDiff(new PhpDiff($current, $objectFromBasket)));
+        }
     }
 
     /**

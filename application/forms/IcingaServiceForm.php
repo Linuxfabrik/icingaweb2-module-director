@@ -2,6 +2,7 @@
 
 namespace Icinga\Module\Director\Forms;
 
+use gipfl\Web\Widget\Hint;
 use Icinga\Data\Filter\Filter;
 use Icinga\Exception\IcingaException;
 use Icinga\Exception\ProgrammingError;
@@ -66,6 +67,7 @@ class IcingaServiceForm extends DirectorObjectForm
         }
 
         if ($this->host && $this->set) {
+            // Probably never reached, as providesOverrides includes this
             $this->setupOnHostForSet();
 
             return;
@@ -91,7 +93,7 @@ class IcingaServiceForm extends DirectorObjectForm
         }
     }
 
-    protected function providesOverrides()
+    public function providesOverrides()
     {
         return $this->applyGenerated
             || $this->inheritedFrom
@@ -128,19 +130,23 @@ class IcingaServiceForm extends DirectorObjectForm
 
         if ($this->hasBeenBlacklisted()) {
             $this->addHtml(
-                Html::tag(
-                    'p',
-                    ['class' => 'warning'],
-                    $this->translate('This Service has been blacklisted on this host')
-                ),
+                Hint::warning($this->translate('This Service has been deactivated on this host')),
                 ['name' => 'HINT_blacklisted']
             );
             $group = null;
-            $this->addDeleteButton($this->translate('Restore'));
+            $this->addDeleteButton($this->translate('Reactivate'));
             $this->setSubmitLabel(false);
         } else {
             $this->addOverrideHint();
             $group = $this->getDisplayGroup('custom_fields');
+            if (! $group) {
+                foreach ($this->getDisplayGroups() as $groupName => $eventualGroup) {
+                    if (preg_match('/^custom_fields:/', $groupName)) {
+                        $group = $eventualGroup;
+                        break;
+                    }
+                }
+            }
             if ($group) {
                 $elements = $group->getElements();
                 $group->setElements([$this->getElement('inheritance_hint')]);
@@ -157,7 +163,7 @@ class IcingaServiceForm extends DirectorObjectForm
                 $this->setSubmitLabel(false);
             }
 
-            $this->addDeleteButton($this->translate('Blacklist'));
+            $this->addDeleteButton($this->translate('Deactivate'));
         }
 
         if (! $this->hasSubmitButton()) {
@@ -167,9 +173,17 @@ class IcingaServiceForm extends DirectorObjectForm
                     ['HtmlTag', ['tag' => 'dl']],
                     'DtDdWrapper',
                 ],
-                'order' => 1000,
+                'order' => self::GROUP_ORDER_BUTTONS,
             ]);
         }
+    }
+
+    /**
+     * @return IcingaHost|null
+     */
+    public function getHost()
+    {
+        return $this->host;
     }
 
     /**
@@ -179,6 +193,7 @@ class IcingaServiceForm extends DirectorObjectForm
      */
     protected function getFirstParent(IcingaService $service)
     {
+        /** @var IcingaService[] $objects */
         $objects = $service->imports()->getObjects();
         if (empty($objects)) {
             throw new RuntimeException('Something went wrong, got no parent');
@@ -253,7 +268,7 @@ class IcingaServiceForm extends DirectorObjectForm
             'service_id' => $service->get('id')
         ])) {
             $msg = sprintf(
-                $this->translate('%s has been blacklisted on %s'),
+                $this->translate('%s has been deactivated on %s'),
                 $service->getObjectName(),
                 $host->getObjectName()
             );
@@ -289,7 +304,7 @@ class IcingaServiceForm extends DirectorObjectForm
         ]);
         if ($db->delete('icinga_host_service_blacklist', $where)) {
             $msg = sprintf(
-                $this->translate('%s is no longer blacklisted on %s'),
+                $this->translate('%s is no longer deactivated on %s'),
                 $service->getObjectName(),
                 $host->getObjectName()
             );
@@ -679,7 +694,7 @@ class IcingaServiceForm extends DirectorObjectForm
                 array('HtmlTag', array('tag' => 'dl')),
                 'Fieldset',
             ),
-            'order' => 40,
+            'order' => self::GROUP_ORDER_CLUSTERING,
             'legend' => $this->translate('Icinga Agent and zone settings')
         ));
 

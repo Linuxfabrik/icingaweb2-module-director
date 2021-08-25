@@ -2,7 +2,7 @@
 
 namespace Icinga\Module\Director\Web\Controller;
 
-use ipl\Html\Html;
+use gipfl\Web\Widget\Hint;
 use Icinga\Exception\IcingaException;
 use Icinga\Exception\InvalidPropertyException;
 use Icinga\Exception\NotFoundError;
@@ -44,6 +44,9 @@ abstract class ObjectController extends ActionController
     );
 
     protected $type;
+
+    /** @var string|null */
+    protected $objectBaseUrl;
 
     public function init()
     {
@@ -164,6 +167,7 @@ abstract class ObjectController extends ActionController
         $object = $this->requireObject();
         $form = IcingaCloneObjectForm::load()
             ->setObject($object)
+            ->setObjectBaseUrl($this->getObjectBaseUrl())
             ->handleRequest();
 
         if ($object->isExternal()) {
@@ -194,7 +198,7 @@ abstract class ObjectController extends ActionController
         try {
             $this->addFieldsFormAndTable($object, $type);
         } catch (NestingError $e) {
-            $this->content()->add(Html::tag('p', ['class' => 'error'], $e->getMessage()));
+            $this->content()->add(Hint::error($e->getMessage()));
         }
     }
 
@@ -314,7 +318,7 @@ abstract class ObjectController extends ActionController
     {
         $this->actions()->add(Link::create(
             $this->translate('Clone'),
-            'director/' . $this->getType() .'/clone',
+            $this->getObjectBaseUrl() . '/clone',
             $this->object->getUrlParams(),
             array('class' => 'icon-paste')
         ));
@@ -517,7 +521,7 @@ abstract class ObjectController extends ActionController
 
         $this->actions()->add(Link::create(
             $this->translate('back'),
-            'director/' . strtolower($this->getType()),
+            $this->getObjectBaseUrl(),
             $params,
             ['class' => 'icon-left-big']
         ));
@@ -552,6 +556,11 @@ abstract class ObjectController extends ActionController
         $this->onObjectFormLoaded($form);
 
         return $form;
+    }
+
+    protected function getObjectBaseUrl()
+    {
+        return $this->objectBaseUrl ?: 'director/' . strtolower($this->getType());
     }
 
     protected function hasBasketSupport()

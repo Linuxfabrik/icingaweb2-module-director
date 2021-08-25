@@ -36,7 +36,7 @@ CREATE TYPE enum_sync_rule_object_type AS ENUM(
   'notification',
   'dependency'
 );
-CREATE TYPE enum_sync_rule_update_policy AS ENUM('merge', 'override', 'ignore');
+CREATE TYPE enum_sync_rule_update_policy AS ENUM('merge', 'override', 'ignore', 'update-only');
 CREATE TYPE enum_sync_property_merge_policy AS ENUM('override', 'merge');
 CREATE TYPE enum_sync_state AS ENUM(
     'unknown',
@@ -46,7 +46,7 @@ CREATE TYPE enum_sync_state AS ENUM(
 );
 CREATE TYPE enum_host_service AS ENUM('host', 'service');
 CREATE TYPE enum_owner_type AS ENUM('user', 'usergroup', 'role');
-
+CREATE DOMAIN d_smallint AS integer CHECK (VALUE >= 0) CHECK (VALUE < 65536);
 
 CREATE OR REPLACE FUNCTION unix_timestamp(timestamp with time zone) RETURNS bigint AS '
         SELECT EXTRACT(EPOCH FROM $1)::bigint AS result
@@ -248,18 +248,35 @@ CREATE TABLE director_datalist_entry (
 CREATE INDEX datalist_entry_datalist ON director_datalist_entry (list_id);
 
 
+CREATE TABLE director_datafield_category (
+  id serial,
+  category_name character varying(255) NOT NULL,
+  description text DEFAULT NULL,
+  PRIMARY KEY (id)
+);
+
+CREATE UNIQUE INDEX datafield_category_name ON director_datafield_category (category_name);
+
+
 CREATE TABLE director_datafield (
   id serial,
+  category_id integer DEFAULT NULL,
   varname character varying(64) NOT NULL,
   caption character varying(255) NOT NULL,
   description text DEFAULT NULL,
   datatype character varying(255) NOT NULL,
 -- datatype_param? multiple ones?
   format enum_property_format,
-  PRIMARY KEY (id)
+  PRIMARY KEY (id),
+  CONSTRAINT director_datafield_category
+    FOREIGN KEY (category_id)
+    REFERENCES director_datafield_category (id)
+    ON DELETE RESTRICT
+    ON UPDATE CASCADE
 );
 
 CREATE INDEX search_idx ON director_datafield (varname);
+CREATE INDEX datafield_category ON director_datafield (category_id);
 
 
 CREATE TABLE director_datafield_setting (
@@ -568,7 +585,7 @@ CREATE TABLE icinga_endpoint (
   object_type enum_object_type_all NOT NULL,
   disabled enum_boolean NOT NULL DEFAULT 'n',
   host character varying(255) DEFAULT NULL,
-  port smallint DEFAULT NULL,
+  port d_smallint DEFAULT NULL,
   log_duration character varying(32) DEFAULT NULL,
   apiuser_id INTEGER DEFAULT NULL,
   PRIMARY KEY (id),
@@ -2182,4 +2199,4 @@ COMMENT ON COLUMN icinga_scheduled_downtime_range.merge_behaviour IS 'set -> = {
 
 INSERT INTO director_schema_migration
   (schema_version, migration_time)
-  VALUES (167, NOW());
+  VALUES (171, NOW());

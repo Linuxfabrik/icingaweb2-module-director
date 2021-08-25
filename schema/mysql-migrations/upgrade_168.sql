@@ -1,12 +1,20 @@
-ALTER TABLE director_datafield ADD COLUMN guid CHAR(36) DEFAULT NULL AFTER format;
-ALTER TABLE director_datalist ADD COLUMN guid CHAR(36) DEFAULT NULL AFTER owner;
-ALTER TABLE icinga_command ADD COLUMN guid CHAR(36) DEFAULT NULL AFTER zone_id;
-ALTER TABLE icinga_dependency ADD COLUMN guid CHAR(36) DEFAULT NULL AFTER parent_service_by_name;
-ALTER TABLE icinga_host ADD COLUMN guid CHAR(36) DEFAULT NULL AFTER template_choice_id;
-ALTER TABLE icinga_notification ADD COLUMN guid CHAR(36) DEFAULT NULL AFTER assign_filter;
-ALTER TABLE icinga_service ADD COLUMN guid CHAR(36) DEFAULT NULL AFTER template_choice_id;
-ALTER TABLE icinga_service_set ADD COLUMN guid CHAR(36) DEFAULT NULL AFTER assign_filter;
-ALTER TABLE icinga_timeperiod ADD COLUMN guid CHAR(36) DEFAULT NULL AFTER prefer_includes;
+CREATE TABLE director_datafield_category (
+  id INT(10) UNSIGNED NOT NULL AUTO_INCREMENT,
+  category_name VARCHAR(255) NOT NULL,
+  description TEXT DEFAULT NULL,
+  PRIMARY KEY (id),
+  UNIQUE KEY category_name (category_name)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+ALTER TABLE director_datafield
+  ADD COLUMN category_id INT(10) UNSIGNED DEFAULT NULL AFTER id,
+  ADD CONSTRAINT director_datafield_category
+    FOREIGN KEY category (category_id)
+    REFERENCES director_datafield_category (id)
+    ON DELETE RESTRICT
+    ON UPDATE CASCADE
+;
+
 
 INSERT INTO director_schema_migration
   (schema_version, migration_time)

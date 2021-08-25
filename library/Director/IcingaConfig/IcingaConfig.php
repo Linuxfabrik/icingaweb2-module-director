@@ -411,25 +411,31 @@ class IcingaConfig
         }
 
         $activity = $this->dbBin($this->getLastActivityChecksum());
-        $this->db->insert(
-            self::$table,
-            array(
+        $this->db->beginTransaction();
+        try {
+            $this->db->insert(self::$table, [
                 'duration'                => $this->generationTime,
                 'first_activity_checksum' => $activity,
                 'last_activity_checksum'  => $activity,
                 'checksum'                => $this->dbBin($this->getChecksum()),
-            )
-        );
-        /** @var IcingaConfigFile $file */
-        foreach ($this->files as $name => $file) {
-            $this->db->insert(
-                'director_generated_config_file',
-                array(
+            ]);
+            /** @var IcingaConfigFile $file */
+            foreach ($this->files as $name => $file) {
+                $this->db->insert('director_generated_config_file', [
                     'config_checksum' => $this->dbBin($this->getChecksum()),
                     'file_checksum'   => $this->dbBin($file->getChecksum()),
                     'file_path'       => $name,
-                )
-            );
+                ]);
+            }
+            $this->db->commit();
+        } catch (\Exception $e) {
+            try {
+                $this->db->rollBack();
+            } catch (\Exception $ignored) {
+                // Well...
+            }
+
+            throw $e;
         }
 
         return $this;
@@ -509,7 +515,6 @@ class IcingaConfig
             "\nconst DirectorStageDir = dirname(dirname(current_filename))\n"
             . $this->renderFlappingLogHelper()
             . $this->renderHostOverridableVars()
-            . $this->renderMagicApplyFor() /* @deprecated Will be removed in 1.8.0 - #1850 #1851 */
         );
 
         return $this;
@@ -573,78 +578,6 @@ if (! globals.contains(DirectorOverrideTemplate)) {
             $settings->override_services_templatename,
             $settings->override_services_varname
         );
-    }
-
-    /**
-     * @deprecated Will be removed in 1.8.0 - #1850 #1851
-     * @return string
-     */
-    protected function renderMagicApplyFor()
-    {
-        if (! $this->usesMagicApplyFor()) {
-            return '';
-        }
-
-        $varname = $this->getMagicApplyVarName();
-
-        return sprintf(
-            '
-/* DEPRECATED: This feature always was experimental and will be removed in 1.8.0 (see issue #1850 #1851) */
-apply Service for (title => params in host.vars["%s"]) {
-  log(LogWarning, "config", "Director: Magic Apply For was used on Host \"" +
-    host.name + "\", it is now deprecated and will be removed in Director 1.8.0 (see issue #1850 #1851)")
-
-  var override = host.vars["%s_vars"][title]
-
-  if (typeof(params["templates"]) in [Array, String]) {
-    for (tpl in params["templates"]) {
-      import tpl
-    }
-  } else {
-    import title
-  }
-
-  if (typeof(params.vars) == Dictionary) {
-    vars += params.vars
-  }
-
-  if (typeof(params["host_name"]) == String) {
-    host_name = params["host_name"]
-  }
-
-  import DirectorOverrideTemplate
-}
-',
-            $varname,
-            $varname
-        );
-    }
-
-    /**
-     * @deprecated Will be removed in 1.8.0 - #1850 #1851
-     * @return mixed|null
-     */
-    protected function getMagicApplyVarName()
-    {
-        return $this->connection->settings()->magic_apply_for;
-    }
-
-    /**
-     * @deprecated Will be removed in 1.8.0 - #1850 #1851
-     * @return string
-     */
-    protected function usesMagicApplyFor()
-    {
-        $db = $this->db;
-        $query = $db->select()->from(
-            array('hv' => 'icinga_host_var'),
-            array('c' => 'COUNT(*)')
-        )->where(
-            'hv.varname = ?',
-            $this->getMagicApplyVarName()
-        );
-
-        return $db->fetchOne($query);
     }
 
     /**

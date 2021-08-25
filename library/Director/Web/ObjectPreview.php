@@ -2,6 +2,7 @@
 
 namespace Icinga\Module\Director\Web;
 
+use gipfl\Web\Widget\Hint;
 use ipl\Html\Text;
 use Icinga\Module\Director\Exception\NestingError;
 use Icinga\Module\Director\Objects\IcingaObject;
@@ -70,9 +71,7 @@ class ObjectPreview
 
         $content = $cc->content();
         if ($object->isDisabled()) {
-            $content->add(Html::tag(
-                'p',
-                ['class' => 'error'],
+            $content->add(Hint::error(
                 $this->translate('This object will not be deployed as it has been disabled')
             ));
         }
@@ -142,9 +141,13 @@ class ObjectPreview
             return $match[1] . $match[2] . $match[3];
         }
 
+        $urlObjectType = $this->object->getShortTableName();
+        if ($urlObjectType === 'service_set') {
+            $urlObjectType = 'service';
+        }
         return $match[1] . Link::create(
             $match[2],
-            sprintf('director/' . $this->object->getShortTableName()),
+            sprintf("director/$urlObjectType"),
             ['name' => $match[2]]
         )->render() . $match[3];
     }

@@ -44,7 +44,7 @@ class BackgroundDaemon
 
     public function run(LoopInterface $loop = null)
     {
-        if ($ownLoop = $loop === null) {
+        if ($ownLoop = ($loop === null)) {
             $loop = Loop::create();
         }
         $this->loop = $loop;
@@ -87,6 +87,7 @@ class BackgroundDaemon
         $this->daemonDb
             ->register($this->jobRunner)
             ->register($this->logProxy)
+            ->register(new DeploymentChecker($this->loop))
             ->run($this->loop);
         $this->setState('running');
     }
@@ -129,6 +130,22 @@ class BackgroundDaemon
         }
 
         return $systemd;
+    }
+
+    /**
+     * @return DaemonProcessDetails
+     */
+    public function getProcessDetails()
+    {
+        return $this->processDetails;
+    }
+
+    /**
+     * @return DaemonProcessState
+     */
+    public function getProcessState()
+    {
+        return $this->processState;
     }
 
     protected function initializeDb(
@@ -178,13 +195,14 @@ class BackgroundDaemon
         $this->shutdown();
     }
 
-    protected function reload()
+    public function reload()
     {
         if ($this->reloading) {
             Logger::error('Ignoring reload request, reload is already in progress');
             return;
         }
         $this->reloading = true;
+        Logger::info('Going gown for reload now');
         $this->setState('reloading the main process');
         $this->daemonDb->disconnect()->then(function () {
             Process::restart();

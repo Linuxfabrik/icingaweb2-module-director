@@ -2,6 +2,7 @@
 
 namespace Icinga\Module\Director\Import;
 
+use Icinga\Exception\InvalidPropertyException;
 use Icinga\Module\Director\Hook\ImportSourceHook;
 use Icinga\Module\Director\RestApi\RestApiClient;
 use Icinga\Module\Director\Web\Form\QuickForm;
@@ -16,18 +17,12 @@ class ImportSourceRestApi extends ImportSourceHook
 
     public function fetchData()
     {
-        $result = $this->getRestApi()->get($this->getUrl());
-        if ($property = $this->getSetting('extract_property')) {
-            if (\property_exists($result, $property)) {
-                $result = $result->$property;
-            } else {
-                throw new \RuntimeException(sprintf(
-                    'Result has no "%s" property. Available keys: %s',
-                    $property,
-                    \implode(', ', \array_keys((array) $result))
-                ));
-            }
-        }
+        $result = $this->getRestApi()->get(
+            $this->getUrl(),
+            null,
+            $this->buildHeaders()
+        );
+        $result = $this->extractProperty($result);
 
         return (array) $result;
     }
@@ -49,6 +44,66 @@ class ImportSourceRestApi extends ImportSourceHook
     }
 
     /**
+     * Extract result from a property specified
+     *
+     * A simple key, like "objects", will take the final result from key objects
+     *
+     * If you have a deeper key like "objects" under the key "results", specify this as "results.objects".
+     *
+     * When a key of the JSON object contains a literal ".", this can be escaped as
+     *
+     * @param $result
+     *
+     * @return mixed
+     */
+    protected function extractProperty($result)
+    {
+        $property = $this->getSetting('extract_property');
+        if (! $property) {
+            return $result;
+        }
+
+        $parts = preg_split('~(?<!\\\\)\.~', $property);
+
+        // iterate over parts of the attribute path
+        $data = $result;
+        foreach ($parts as $part) {
+            // un-escape any dots
+            $part = preg_replace('~\\\\.~', '.', $part);
+
+            if (property_exists($data, $part)) {
+                $data = $data->$part;
+            } else {
+                throw new \RuntimeException(sprintf(
+                    'Result has no "%s" property. Available keys: %s',
+                    $part,
+                    implode(', ', array_keys((array) $data))
+                ));
+            }
+        }
+
+        return $data;
+    }
+
+    protected function buildHeaders()
+    {
+        $headers = [];
+
+        $text = $this->getSetting('headers', '');
+        foreach (preg_split('~\r?\n~', $text, -1, PREG_SPLIT_NO_EMPTY) as $header) {
+            $header = trim($header);
+            $parts = preg_split('~\s*:\s*~', $header, 2);
+            if (count($parts) < 2) {
+                throw new InvalidPropertyException('Could not parse header: "%s"', $header);
+            }
+
+            $headers[$parts[0]] = $parts[1];
+        }
+
+        return $headers;
+    }
+
+    /**
      * @param QuickForm $form
      * @throws \Zend_Form_Exception
      */
@@ -59,6 +114,7 @@ class ImportSourceRestApi extends ImportSourceHook
         static::addUrl($form);
         static::addResultProperty($form);
         static::addAuthentication($form);
+        static::addHeader($form);
         static::addProxy($form);
     }
 
@@ -87,25 +143,42 @@ class ImportSourceRestApi extends ImportSourceHook
      * @param QuickForm $form
      * @throws \Zend_Form_Exception
      */
+    protected static function addHeader(QuickForm $form)
+    {
+        $form->addElement('textarea', 'headers', [
+            'label'       => $form->translate('HTTP Header'),
+            'description' => implode(' ', [
+                $form->translate('Additional headers for the HTTP request.'),
+                $form->translate('Specify headers in text format "Header: Value", each header on a new line.'),
+            ]),
+            'class'       => 'preformatted',
+            'rows'        => 4,
+        ]);
+    }
+
+    /**
+     * @param QuickForm $form
+     * @throws \Zend_Form_Exception
+     */
     protected static function addSslOptions(QuickForm $form)
     {
         $ssl = ! ($form->getSentOrObjectSetting('scheme', 'HTTPS') === 'HTTP');
 
         if ($ssl) {
-            static::addBoolean($form, 'ssl_verify_peer', array(
+            static::addBoolean($form, 'ssl_verify_peer', [
                 'label'       => $form->translate('Verify Peer'),
                 'description' => $form->translate(
                     'Whether we should check that our peer\'s certificate has'
                     . ' been signed by a trusted CA. This is strongly recommended.'
                 )
-            ), 'y');
-            static::addBoolean($form, 'ssl_verify_host', array(
+            ], 'y');
+            static::addBoolean($form, 'ssl_verify_host', [
                 'label'       => $form->translate('Verify Host'),
                 'description' => $form->translate(
                     'Whether we should check that the certificate matches the'
                     . 'configured host'
                 )
-            ), 'y');
+            ], 'y');
         }
     }
 
@@ -115,13 +188,13 @@ class ImportSourceRestApi extends ImportSourceHook
      */
     protected static function addUrl(QuickForm $form)
     {
-        $form->addElement('text', 'url', array(
+        $form->addElement('text', 'url', [
             'label'    => 'REST API URL',
             'description' => $form->translate(
                 'Something like https://api.example.com/rest/v2/objects'
             ),
             'required' => true,
-        ));
+        ]);
     }
 
     /**
@@ -130,13 +203,17 @@ class ImportSourceRestApi extends ImportSourceHook
      */
     protected static function addResultProperty(QuickForm $form)
     {
-        $form->addElement('text', 'extract_property', array(
-            'label'    => 'Extract property',
-            'description' => $form->translate(
-                'Often the expected result is provided in a property like "objects".'
-                . ' Please specify this if required'
-            ),
-        ));
+        $form->addElement('text', 'extract_property', [
+            'label'       => 'Extract property',
+            'description' => implode("\n", [
+                $form->translate('Often the expected result is provided in a property like "objects".'
+                    . ' Please specify this if required.'),
+                $form->translate('Also deeper keys can be specific by a dot-notation:'),
+                '"result.objects", "key.deeper_key.very_deep"',
+                $form->translate('Literal dots in a key name can be written in the escape notation:'),
+                '"key\.with\.dots"',
+            ])
+        ]);
     }
 
     /**
@@ -145,16 +222,16 @@ class ImportSourceRestApi extends ImportSourceHook
      */
     protected static function addAuthentication(QuickForm $form)
     {
-        $form->addElement('text', 'username', array(
+        $form->addElement('text', 'username', [
             'label' => $form->translate('Username'),
             'description' => $form->translate(
-                'Will be used for SOAP authentication against your vCenter'
+                'Will be used to authenticate against your REST API'
             ),
-        ));
+        ]);
 
-        $form->addElement('password', 'password', array(
+        $form->addElement('storedPassword', 'password', [
             'label' => $form->translate('Password'),
-        ));
+        ]);
     }
 
     /**
@@ -197,7 +274,7 @@ class ImportSourceRestApi extends ImportSourceHook
 
                 $passRequired = strlen($form->getSentOrObjectSetting('proxy_user')) > 0;
 
-                $form->addElement('password', 'proxy_pass', [
+                $form->addElement('storedPassword', 'proxy_pass', [
                     'label'    => $form->translate('Proxy Password'),
                     'required' => $passRequired
                 ]);
@@ -295,9 +372,9 @@ class ImportSourceRestApi extends ImportSourceHook
      */
     protected static function optionalBoolean(QuickForm $form, $key, $label, $description)
     {
-        static::addBoolean($form, $key, array(
+        static::addBoolean($form, $key, [
             'label'       => $label,
             'description' => $description
-        ));
+        ]);
     }
 }

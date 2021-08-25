@@ -16,6 +16,8 @@ class IcingaCloneObjectForm extends DirectorForm
     /** @var IcingaObject */
     protected $object;
 
+    protected $baseObjectUrl;
+
     public function setup()
     {
         $name = $this->object->getObjectName();
@@ -92,6 +94,13 @@ class IcingaCloneObjectForm extends DirectorForm
             $this->translate('Clone "%s"'),
             $name
         );
+    }
+
+    public function setObjectBaseUrl($url)
+    {
+        $this->baseObjectUrl = $url;
+
+        return $this;
     }
 
     public function onSuccess()
@@ -206,7 +215,7 @@ class IcingaCloneObjectForm extends DirectorForm
                 );
             } else {
                 $this->setSuccessUrl(
-                    'director/' . strtolower($type),
+                    $this->baseObjectUrl ?: 'director/' . strtolower($type),
                     $new->getUrlParams()
                 );
             }

@@ -3,6 +3,7 @@
 namespace Icinga\Module\Director\Web;
 
 use Exception;
+use gipfl\Web\Widget\Hint;
 use Icinga\Exception\ProgrammingError;
 use Icinga\Module\Director\Core\CoreApi;
 use Icinga\Module\Director\Forms\IcingaForgetApiKeyForm;
@@ -12,6 +13,7 @@ use Icinga\Exception\NotFoundError;
 use Icinga\Module\Director\IcingaConfig\AgentWizard;
 use Icinga\Module\Director\Objects\IcingaHost;
 use Icinga\Module\Director\Util;
+use Icinga\Module\Director\Web\Widget\Documentation;
 use ipl\Html\Html;
 use gipfl\IcingaWeb2\Link;
 use gipfl\Translation\TranslationHelper;
@@ -43,7 +45,7 @@ class SelfService
         if ($host->isTemplate()) {
             $this->showSelfServiceTemplateInstructions($controller);
         } elseif ($key = $host->getProperty('api_key')) {
-            $this->showRegisteredAgentInstructions($controller);
+            $this->showRegisteredAgentInstructions($key, $controller);
         } elseif ($key = $host->getSingleResolvedProperty('api_key')) {
             $this->showNewAgentInstructions($controller);
         } else {
@@ -52,9 +54,10 @@ class SelfService
     }
 
     /**
+     * @param string $key
      * @param ControlsAndContent $c
      */
-    protected function showRegisteredAgentInstructions(ControlsAndContent $c)
+    protected function showRegisteredAgentInstructions($key, ControlsAndContent $c)
     {
         $c->addTitle($this->translate('Registered Agent'));
         $c->content()->add([
@@ -64,7 +67,8 @@ class SelfService
                 . ' secret key, you might want to dismiss the current key. This'
                 . ' would allow you to register the same host again.'
             )),
-            Html::tag('p', ['class' => 'warning'], $this->translate(
+            Html::tag('p', null, [$this->translate('Api Key:'), ' ', Html::tag('strong', null, $key)]),
+            Hint::warning($this->translate(
                 'It is not a good idea to do so as long as your Agent still has'
                 . ' a valid Self Service API key!'
             )),
@@ -99,27 +103,16 @@ class SelfService
             ]
         ));
 
-        if ($this->hasDocsModuleLoaded()) {
-            $actions->add(Link::create(
-                $this->translate('Documentation'),
-                'doc/module/director/chapter/Self-Service-API',
-                null,
-                ['class' => 'icon-book']
-            ));
-        }
+        $actions->add($this->getDocumentationLink());
 
         if ($hasKey) {
-            $wizard = new AgentWizard($host);
-
             $c->add([
-                Html::tag('p', null, [$this->translate('Api Key:'), ' ', Html::tag('strong', null, $key)]),
-                Html::tag(
-                    'pre',
-                    ['class' => 'logfile'],
-                    $wizard->renderTokenBasedWindowsInstaller($key)
-                ),
+                Html::tag('p', [
+                    $this->translate('Api Key:'), ' ', Html::tag('strong', null, $key)
+                ]),
+                $this->getWindowsInstructions($host, $key),
                 Html::tag('h2', null, $this->translate('Generate a new key')),
-                Html::tag('p', ['class' => 'warning'], $this->translate(
+                Hint::warning($this->translate(
                     'This will invalidate the former key'
                 )),
             ]);
@@ -135,10 +128,57 @@ class SelfService
                 Html::tag('p', null, $this->translate(
                     'You can stop sharing a Template at any time. This will'
                     . ' immediately invalidate the former key.'
+                ) . ' ' . $this->translate(
+                    'Generated Host keys will continue to work, but you\'ll no'
+                    . ' longer be able to register new Hosts with this key'
                 )),
                 IcingaForgetApiKeyForm::load()->setHost($host)->handleRequest()
             ]);
         }
+    }
+
+    protected function getWindowsInstructions($host, $key)
+    {
+        $wizard = new AgentWizard($host);
+
+        return [
+            Html::tag('h2', $this->translate('Icinga for Windows')),
+            Html::tag('p', Html::sprintf(
+                $this->translate('In case you\'re using %s, please run this Script:'),
+                Html::tag('a', [
+                    'href'   => 'https://icinga.com/docs/windows/latest/',
+                    'target' => '_blank',
+                ], $this->translate('Icinga for Windows'))
+            )),
+            Html::tag(
+                'pre',
+                ['class' => 'logfile'],
+                $wizard->renderIcinga4WindowsWizardCommand($key)
+            ),
+            Html::tag('h3', $this->translate('Icinga 2 Powershell Module')),
+            Html::tag('p', Html::sprintf(
+                $this->translate('In case you\'re using the legacy %s, please run:'),
+                Html::tag('a', [
+                    'href'   => 'https://github.com/Icinga/icinga2-powershell-module',
+                    'target' => '_blank',
+                ], $this->translate('Icinga 2 Powershell Module'))
+            )),
+            Html::tag(
+                'pre',
+                ['class' => 'logfile'],
+                $wizard->renderPowershellModuleInstaller($key)
+            ),
+        ];
+    }
+
+    protected function getDocumentationLink()
+    {
+        return Documentation::link(
+            $this->translate('Documentation'),
+            'director',
+            '74-Self-Service-API',
+            $this->translate('Self Service API')
+        );
     }
 
     /**
@@ -146,31 +186,15 @@ class SelfService
      */
     protected function showNewAgentInstructions(ControlsAndContent $cc)
     {
-        $c = $cc->content();
+        $content = $cc->content();
         $host = $this->host;
         $key = $host->getSingleResolvedProperty('api_key');
-        $cc->addTitle($this->translate('Configure this Agent  via Self Service API'));
-
-        if ($this->hasDocsModuleLoaded()) {
-            $actions = $cc->actions();
-            $actions->add(Link::create(
-                $this->translate('Documentation'),
-                'doc/module/director/chapter/Self-Service-API',
-                null,
-                ['class' => 'icon-book']
-            ));
-        }
-
-        $wizard = new AgentWizard($host);
-
-        $c->add([
-            Html::tag('h2', null, 'Microsoft Windows'),
-            Html::tag(
-                'pre',
-                ['class' => 'logfile'],
-                $wizard->renderTokenBasedWindowsInstaller($key)
-            )
-        ]);
+        $cc->addTitle($this->translate('Configure this Agent via Self Service API'));
+        $cc->actions()->add($this->getDocumentationLink());
+        $content->add(Html::tag('p', [
+            $this->translate('Inherited Template Api Key:'), ' ', Html::tag('strong', null, $key)
+        ]));
+        $content->add($this->getWindowsInstructions($host, $key));
     }
 
     /**
@@ -202,11 +226,11 @@ class SelfService
         $certname = $host->getObjectName();
 
         try {
-            $ticket = Util::getIcingaTicket($certname, $this->api->getTicketSalt());
+            $ticket = $this->api->getTicket($host->getObjectName());
             $wizard = new AgentWizard($host);
-            $wizard->setTicketSalt($this->api->getTicketSalt());
+            $wizard->setTicket($ticket);
         } catch (Exception $e) {
-            $c->add(Html::tag('p', ['class' => 'error'], sprintf(
+            $c->add(Hint::error(sprintf(
                 $this->translate(
                     'A ticket for this agent could not have been requested from'
                     . ' your deployment endpoint: %s'
@@ -254,7 +278,7 @@ class SelfService
     public function handleLegacyAgentDownloads($os)
     {
         $wizard = new AgentWizard($this->host);
-        $wizard->setTicketSalt($this->api->getTicketSalt());
+        $wizard->setTicket($this->api->getTicket($this->host->getObjectName()));
 
         switch ($os) {
             case 'windows-kickstart':
