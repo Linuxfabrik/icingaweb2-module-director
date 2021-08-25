@@ -156,6 +156,7 @@ class DirectorDatafield extends DbObjectWithSettings
     public static function import($plain, Db $db, $replace = false)
     {
         $properties = (array) $plain;
+        $compare = Json::decode(Json::encode($properties));
 
         if (isset($properties['settings']->datalist)) {
             // Just try to load the list, import should fail if missing
@@ -193,7 +194,7 @@ class DirectorDatafield extends DbObjectWithSettings
                     $obj = static::create($properties, $db);
                     $obj->hasBeenModified = true; // a modified object will updated later on
                     $obj->loadedFromDb = true; // use update instead of insert (DbObject store())
-                    if ($export->varname != $properties['varname']) {
+                    if ($export['varname'] != $properties['varname']) {
                         $obj->shouldBeRenamed = true;
                         $obj->oldName = $export->varname;
                     }
@@ -219,7 +220,6 @@ class DirectorDatafield extends DbObjectWithSettings
             $id = null;
         }
 
-        $compare = Json::decode(Json::encode($properties));
         if ($id && static::exists($id, $db)) {
             $existing = static::loadWithAutoIncId($id, $db);
             $existingProperties = (array) $existing->export();
