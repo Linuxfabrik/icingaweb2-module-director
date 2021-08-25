@@ -50,7 +50,6 @@ Please follow the [original installation guide](https://git.linuxfabrik.ch/linux
 
 * Currently the only supported database is MySQL/MariaDB.
 * DataFields: Renaming or removing an entry will only rename/remove the entry in the datalist, not the applied variables on other objects such as hosts or services.
-* Cloning does not work right now, because it tries to duplicate the GUID.
 
 
 ## Future
