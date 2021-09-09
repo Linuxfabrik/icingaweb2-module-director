@@ -196,7 +196,7 @@ class DirectorDatafield extends DbObjectWithSettings
                     $obj->loadedFromDb = true; // use update instead of insert (DbObject store())
                     if ($export['varname'] != $properties['varname']) {
                         $obj->shouldBeRenamed = true;
-                        $obj->oldName = $export->varname;
+                        $obj->oldName = $export['varname'];
                     }
                     return $obj;
                 }
