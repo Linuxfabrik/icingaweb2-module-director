@@ -433,7 +433,7 @@ class BasketSnapshot extends DbObject
                             $dump = iconv('UTF-8', 'UTF-8//IGNORE', $dump);
                         }
                         throw new JsonEncodeException(sprintf(
-                            'Failed to encode object ot type "%s": %s, %s',
+                            'Failed to encode object of type "%s": %s, %s',
                             $type,
                             $dump,
                             $singleError->getMessage()
