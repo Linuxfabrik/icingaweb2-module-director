@@ -8,6 +8,7 @@ use Icinga\Module\Director\Exception\DuplicateKeyException;
 use Icinga\Module\Director\IcingaConfig\IcingaConfigHelper as c;
 use Icinga\Module\Director\IcingaConfig\IcingaLegacyConfigHelper as c1;
 use Icinga\Module\Director\Objects\Extension\Arguments;
+use Ramsey\Uuid\Uuid;
 use Zend_Db_Select as DbSelect;
 
 class IcingaCommand extends IcingaObject implements ObjectWithArguments, ExportInterface
@@ -246,6 +247,8 @@ class IcingaCommand extends IcingaObject implements ObjectWithArguments, ExportI
         $properties = (array) $plain;
         $name = $properties['object_name'];
         $key = $name;
+
+        $properties['uuid'] = Uuid::fromString($properties['uuid'])->getBytes();
 
         if ($replace && static::exists($key, $db)) {
             $object = static::load($key, $db);

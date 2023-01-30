@@ -18,6 +18,7 @@ use Icinga\Module\Director\Objects\IcingaTemplateChoice;
 use Icinga\Module\Director\Objects\ImportSource;
 use Icinga\Module\Director\Objects\InstantiatedViaHook;
 use Icinga\Module\Director\Objects\SyncRule;
+use Ramsey\Uuid\Uuid;
 use RuntimeException;
 
 class Exporter
@@ -271,6 +272,10 @@ class Exporter
         $props = (array) $object->toPlainObject($this->resolveObjects, !$this->showDefaults);
         if ($object->supportsFields()) {
             $props['fields'] = $this->fieldReferenceLoader->loadFor($object);
+        }
+        if ($object->getUuidColumn() !== null) { // copied from hasUuidColumn() from DbObject.php
+            // augment output with uuid if present
+            $props[$object->getUuidColumn()] = Uuid::fromBytes($object->get($object->getUuidColumn()))->toString();
         }
 
         return $props;
