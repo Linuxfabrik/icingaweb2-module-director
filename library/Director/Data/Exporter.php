@@ -275,7 +275,7 @@ class Exporter
         }
         // currently adding the uuid to the object here, as this only affects objects to be exported.
         // another option would be to do this in `IcingaObject::toPlainObject()`, however that leads to many errors since currently all functions using toPlainObject expect the uuid to still be in binary
-        if ($object->getUuidColumn() !== null) { // copied from hasUuidColumn() from DbObject.php
+        if ($object->hasUuidColumn()) {
             // augment output with uuid if present
             $props[$object->getUuidColumn()] = Uuid::fromBytes($object->get($object->getUuidColumn()))->toString();
         }
