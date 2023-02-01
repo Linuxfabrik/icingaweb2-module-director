@@ -248,6 +248,7 @@ class IcingaCommand extends IcingaObject implements ObjectWithArguments, ExportI
         $name = $properties['object_name'];
         $key = $name;
 
+        // convert the string uuid to binary / an UuidInterface, which is how the rest of the code expects it to be
         $properties['uuid'] = Uuid::fromString($properties['uuid'])->getBytes();
 
         if ($replace && static::exists($key, $db)) {
