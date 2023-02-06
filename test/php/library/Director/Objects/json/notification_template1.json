@@ -1,0 +1,10 @@
+{
+    "NotificationTemplate": {
+        "___TEST___notification_template1": {
+            "fields": [],
+            "object_name": "___TEST___notification_template1",
+            "object_type": "template",
+            "uuid": "6f170bfe-0464-4207-a840-2bd7419f91f3"
+        }
+    }
+}
