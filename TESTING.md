@@ -4,7 +4,7 @@ Since the phpunit tests currently do not seem to work with the Uuid library, we 
 
 | Object                 | Test 1 | Test 2 | Test 3 | Test 4 | Test 5 | Test 6 | Test 7 | Test 8 |
 | ---                    | ---    | ---    | ---    | ---    | ---    | ---    | ---    | ---    |
-| Commands               | PASS   | PASS   | PASS   | FAIL   | FAIL   | N/A    | N/A    | N/A    |
+| Commands               | PASS   | PASS   | PASS   | PASS   | PASS   | N/A    | N/A    | N/A    |
 | DataFields             | todo   | todo   | todo   | todo   | todo   | todo   | todo   | todo   |
 | DataLists              | todo   | todo   | todo   | todo   | todo   | todo   | todo   | todo   |
 | Dependencies           | todo   | todo   | todo   | todo   | todo   | todo   | todo   | todo   |
