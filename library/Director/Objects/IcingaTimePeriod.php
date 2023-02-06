@@ -2,6 +2,7 @@
 
 namespace Icinga\Module\Director\Objects;
 
+use Ramsey\Uuid\Uuid;
 use Icinga\Module\Director\Db;
 use Icinga\Module\Director\DirectorObject\Automation\ExportInterface;
 use Icinga\Module\Director\Exception\DuplicateKeyException;
@@ -81,6 +82,31 @@ class IcingaTimePeriod extends IcingaObject implements ExportInterface
         $properties = (array) $plain;
         $name = $properties['object_name'];
         $key = $name;
+
+        // convert the string uuid to binary / an UuidInterface, which is how the rest of the code expects it to be
+        $properties['uuid'] = Uuid::fromString($properties['uuid'])->getBytes();
+
+        $table = 'icinga_timeperiod'; // since this is a static method we cannot use the class variable $table. redefine it here
+
+        // check if there is an existing object in the database based on the uuid
+        $dba = $db->getDbAdapter();
+        $query = $dba->select()
+            ->from($table)
+            ->where('uuid = ?', $properties['uuid']);
+        $candidates = self::loadAll($db, $query);
+        if (count($candidates) == 1) {
+            // by setting the key to the object with the uuid in the databse, the exists check succeeds, causing the old object to be loaded from the db and updated with the new values (setProperties() below).
+            // note that this only works if $key is unique, since the initial load of the existing object is done via key instead of uuid with this method.
+            // if that is a problem, we have to follow a similar approach as in v1.8.1.2021090901.
+            $key = reset($candidates)->properties['object_name']; // reset() returns the first element of the array
+
+        } elseif (count($candidates) > 1) {
+            throw new DuplicateKeyException(
+                'Time Period "%s" with uuid "%s" already exists. This means there is a duplicate uuid in the database. This should never happen.',
+                $name,
+                $properties['uuid']
+            );
+        }
 
         if ($replace && static::exists($key, $db)) {
             $object = static::load($key, $db);

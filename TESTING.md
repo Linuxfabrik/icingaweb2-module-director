@@ -1,6 +1,6 @@
 # Manual Testing of the Fork Features
 
-Since the phpunit tests currently do not seem to work with the Uuid library, we manually test the added features of the fork.
+Since the phpunit tests currently do not seem to work with the Uuid library, we manually test the newly added features of the fork.
 
 | Object                 | Test 1 | Test 2 | Test 3 | Test 4 | Test 5 | Test 6 | Test 7 |
 | ---                    | ---    | ---    | ---    | ---    | ---    | ---    | ---    |
@@ -9,7 +9,7 @@ Since the phpunit tests currently do not seem to work with the Uuid library, we 
 | Notification Templates | PASS   | PASS   | PASS   | PASS   | N/A    | N/A    | N/A    |
 | Host Templates         | PASS   | PASS   | PASS   | PASS   | N/A    | N/A    | N/A    |
 | Dependencies           | PASS   | PASS   | PASS   | PASS   | N/A    | N/A    | N/A    |
-| Timeperiods            | todo   | todo   | todo   | todo   | todo   | todo   | todo   |
+| Timeperiods            | PASS   | PASS   | PASS   | PASS   | N/A    | N/A    | N/A    |
 | Service Sets           | todo   | todo   | todo   | todo   | N/A    | N/A    | todo   |
 | DataFields             | todo   | todo   | todo   | todo   | todo   | todo   | todo   |
 | DataLists              | todo   | todo   | todo   | todo   | todo   | todo   | todo   |
