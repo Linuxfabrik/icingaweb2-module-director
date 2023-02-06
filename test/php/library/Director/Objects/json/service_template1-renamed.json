@@ -1,0 +1,10 @@
+{
+    "ServiceTemplate": {
+        "___TEST___service_template1-renamed": {
+            "fields": [],
+            "object_name": "___TEST___service_template1-renamed",
+            "object_type": "template",
+            "uuid": "34c02f99-793f-4495-b578-fec81267eafa"
+        }
+    }
+}

@@ -5,13 +5,13 @@ Since the phpunit tests currently do not seem to work with the Uuid library, we 
 | Object                 | Test 1 | Test 2 | Test 3 | Test 4 | Test 5 | Test 6 | Test 7 | Test 8 |
 | ---                    | ---    | ---    | ---    | ---    | ---    | ---    | ---    | ---    |
 | Commands               | PASS   | PASS   | PASS   | PASS   | PASS   | N/A    | N/A    | N/A    |
+| Service Templates      | PASS   | PASS   | PASS   | PASS   | PASS   | N/A    | N/A    | N/A    |
+| Notification Templates | todo   | todo   | todo   | todo   | todo   | todo   | todo   | todo   |
+| Host Templates         | todo   | todo   | todo   | todo   | todo   | todo   | todo   | todo   |
+| Service Sets           | todo   | todo   | todo   | todo   | todo   | todo   | todo   | todo   |
 | DataFields             | todo   | todo   | todo   | todo   | todo   | todo   | todo   | todo   |
 | DataLists              | todo   | todo   | todo   | todo   | todo   | todo   | todo   | todo   |
 | Dependencies           | todo   | todo   | todo   | todo   | todo   | todo   | todo   | todo   |
-| Host Templates         | todo   | todo   | todo   | todo   | todo   | todo   | todo   | todo   |
-| Notification Templates | todo   | todo   | todo   | todo   | todo   | todo   | todo   | todo   |
-| Service Sets           | todo   | todo   | todo   | todo   | todo   | todo   | todo   | todo   |
-| Service Templates      | todo   | todo   | todo   | todo   | todo   | todo   | todo   | todo   |
 | Timeperiods            | todo   | todo   | todo   | todo   | todo   | todo   | todo   | todo   |
 
 
@@ -55,9 +55,12 @@ EOF
 
 
 ## Test 3: change name during import
-* `icingacli director basket restore --purge <Object> < /usr/share/icingaweb2/modules/director/test/php/library/Director/Objects/json/<object>1.json`
-* `icingacli director basket restore < /usr/share/icingaweb2/modules/director/test/php/library/Director/Objects/json/<object>1-renamed.json`
-* `icingacli director basket dump --name all`
+* import the initial object:
+    * `icingacli director basket restore --purge <Object> < /usr/share/icingaweb2/modules/director/test/php/library/Director/Objects/json/<object>1.json`
+    * `icingacli director basket dump --name all`
+* import the renamed object:
+    * `icingacli director basket restore < /usr/share/icingaweb2/modules/director/test/php/library/Director/Objects/json/<object>1-renamed.json`
+    * `icingacli director basket dump --name all`
 * make sure that there is only one object with the new name and same uuid present
 
 
@@ -69,7 +72,7 @@ EOF
 
 ## Test 5: cloning with uuids
 * `icingacli director basket restore --purge <Object> < /usr/share/icingaweb2/modules/director/test/php/library/Director/Objects/json/<object>1.json`
-* `icingacli director command clone --from ___TEST___command1 ___TEST___command1-cloned`
+* `icingacli director <object> clone --from ___TEST___<object>1 ___TEST___<object>1-cloned`
 * `icingacli director basket dump --name all`
 * make sure that the clone has a different uuid
 
