@@ -7,7 +7,7 @@ Since the phpunit tests currently do not seem to work with the Uuid library, we 
 | Commands               | PASS   | PASS   | PASS   | PASS   | N/A    | N/A    | N/A    |
 | Service Templates      | PASS   | PASS   | PASS   | PASS   | N/A    | N/A    | N/A    |
 | Notification Templates | PASS   | PASS   | PASS   | PASS   | N/A    | N/A    | N/A    |
-| Host Templates         | todo   | todo   | todo   | todo   | N/A    | N/A    | N/A    |
+| Host Templates         | PASS   | PASS   | PASS   | PASS   | N/A    | N/A    | N/A    |
 | Service Sets           | todo   | todo   | todo   | todo   | N/A    | N/A    | N/A    |
 | DataFields             | todo   | todo   | todo   | todo   | todo   | todo   | todo   |
 | DataLists              | todo   | todo   | todo   | todo   | todo   | todo   | todo   |
@@ -67,7 +67,8 @@ EOF
 
 ## Test 4: cloning with uuids
 * `icingacli director basket restore --purge <Object> < /usr/share/icingaweb2/modules/director/test/php/library/Director/Objects/json/<object>1.json`
-* either via webgui or via `icingacli director <object> clone --from ___TEST___<object>1 ___TEST___<object>1-cloned` (cli does not work for NotificationTemplate)
+* `icingacli director basket dump --name export`
+* clone the object via the webgui (the cli does not work for all object types)
 * `icingacli director basket dump --name export`
 * make sure that the clone has a different uuid
 

@@ -1,0 +1,10 @@
+{
+    "HostTemplate": {
+        "___TEST___host_template1-renamed": {
+            "fields": [],
+            "object_name": "___TEST___host_template1-renamed",
+            "object_type": "template",
+            "uuid": "79169e4b-a263-4bd7-963d-79c8dfe205d8"
+        }
+    }
+}
