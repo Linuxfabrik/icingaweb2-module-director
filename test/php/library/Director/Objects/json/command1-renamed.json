@@ -1,0 +1,12 @@
+{
+    "Command": {
+        "___TEST___command1-renamed": {
+            "command": "exit 1",
+            "fields": [],
+            "methods_execute": "PluginCheck",
+            "object_name": "___TEST___command1-renamed",
+            "object_type": "object",
+            "uuid": "601fc27f-121c-4a3f-9c1b-eb89dd51a0fb"
+        }
+    }
+}
