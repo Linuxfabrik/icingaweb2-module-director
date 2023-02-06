@@ -1,0 +1,9 @@
+{
+    "Dependency": {
+        "___TEST___dependency1": {
+            "object_name": "___TEST___dependency1",
+            "object_type": "template",
+            "uuid": "48e91c02-2e50-4ecb-ae4a-f45700b8c507"
+        }
+    }
+}

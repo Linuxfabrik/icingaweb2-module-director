@@ -8,11 +8,11 @@ Since the phpunit tests currently do not seem to work with the Uuid library, we 
 | Service Templates      | PASS   | PASS   | PASS   | PASS   | N/A    | N/A    | N/A    |
 | Notification Templates | PASS   | PASS   | PASS   | PASS   | N/A    | N/A    | N/A    |
 | Host Templates         | PASS   | PASS   | PASS   | PASS   | N/A    | N/A    | N/A    |
-| Service Sets           | todo   | todo   | todo   | todo   | N/A    | N/A    | N/A    |
+| Dependencies           | PASS   | PASS   | PASS   | PASS   | N/A    | N/A    | N/A    |
+| Timeperiods            | todo   | todo   | todo   | todo   | todo   | todo   | todo   |
+| Service Sets           | todo   | todo   | todo   | todo   | N/A    | N/A    | todo   |
 | DataFields             | todo   | todo   | todo   | todo   | todo   | todo   | todo   |
 | DataLists              | todo   | todo   | todo   | todo   | todo   | todo   | todo   |
-| Dependencies           | todo   | todo   | todo   | todo   | todo   | todo   | todo   |
-| Timeperiods            | todo   | todo   | todo   | todo   | todo   | todo   | todo   |
 
 
 ## Preparations
