@@ -1,0 +1,11 @@
+{
+    "TimePeriod": {
+        "___TEST___timeperiod1-renamed": {
+            "object_name": "___TEST___timeperiod1-renamed",
+            "object_type": "template",
+            "ranges": {},
+            "update_method": "LegacyTimePeriod",
+            "uuid": "cdbe7b9d-cbd5-4b67-acbd-95d197a867ba"
+        }
+    }
+}
