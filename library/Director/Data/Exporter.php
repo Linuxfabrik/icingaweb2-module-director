@@ -249,7 +249,13 @@ class Exporter
                 $props['settings'] = (object) $object->getSettings(); // Already sorted
             }
         }
-        unset($props['uuid']); // Not yet
+        // currently adding the uuid to the object here, as this only affects objects to be exported.
+        // another option would be to do this in `IcingaObject::toPlainObject()`, however that leads to many errors since currently all functions using toPlainObject expect the uuid to still be in binary
+        if ($object->hasUuidColumn()) {
+            // augment output with uuid if present
+            $props[$object->getUuidColumn()] = Uuid::fromBytes($object->get($object->getUuidColumn()))->toString();
+        }
+
         if (! $this->showDefaults) {
             foreach ($props as $key => $value) {
                 // We assume NULL as a default value for all non-IcingaObject properties

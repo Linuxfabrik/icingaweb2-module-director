@@ -1,0 +1,17 @@
+{
+    "DataList": {
+        "___TEST___datalist1-renamed": {
+            "entries": [
+                {
+                    "entry_name": "___TEST___list_entry",
+                    "entry_value": "___TEST___ List Entry",
+                    "format": "string",
+                    "allowed_roles": null
+                }
+            ],
+            "list_name": "___TEST___datalist1-renamed",
+            "owner": "admin",
+            "uuid": "8d41be06-8075-4694-b953-36ccc819cd5f"
+        }
+    }
+}

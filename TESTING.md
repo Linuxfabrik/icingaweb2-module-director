@@ -2,17 +2,17 @@
 
 Since the phpunit tests currently do not seem to work with the Uuid library, we manually test the newly added features of the fork.
 
-| Object                 | Test 1 | Test 2 | Test 3 | Test 4 | Test 5 | Test 6 | Test 7 | Test 8 |
-| ---                    | ---    | ---    | ---    | ---    | ---    | ---    | ---    | ---    |
-| Commands               | PASS   | PASS   | PASS   | PASS   | N/A    | N/A    | N/A    | N/A    |
-| Service Templates      | PASS   | PASS   | PASS   | PASS   | N/A    | N/A    | N/A    | N/A    |
-| Notification Templates | PASS   | PASS   | PASS   | PASS   | N/A    | N/A    | N/A    | N/A    |
-| Host Templates         | PASS   | PASS   | PASS   | PASS   | N/A    | N/A    | N/A    | N/A    |
-| Dependencies           | PASS   | PASS   | PASS   | PASS   | N/A    | N/A    | N/A    | N/A    |
-| Timeperiods            | PASS   | PASS   | PASS   | PASS   | N/A    | N/A    | N/A    | N/A    |
-| Service Sets           | PASS   | PASS   | PASS   | PASS   | PASS   | PASS   | N/A    | N/A    |
-| DataFields             | todo   | todo   | todo   | todo   | N/A    | todo   | N/A    | N/A    |
-| DataLists              | todo   | todo   | todo   | todo   | N/A    | todo   | N/A    | N/A    |
+| Object                | Test 1 | Test 2 | Test 3 | Test 4 | Test 5 | Test 6 | Test 7 | Test 8 |
+| ---                   | ---    | ---    | ---    | ---    | ---    | ---    | ---    | ---    |
+| Command               | PASS   | PASS   | PASS   | PASS   | N/A    | N/A    | N/A    | N/A    |
+| Service Template      | PASS   | PASS   | PASS   | PASS   | N/A    | N/A    | N/A    | N/A    |
+| Notification Template | PASS   | PASS   | PASS   | PASS   | N/A    | N/A    | N/A    | N/A    |
+| Host Template         | PASS   | PASS   | PASS   | PASS   | N/A    | N/A    | N/A    | N/A    |
+| Dependency            | PASS   | PASS   | PASS   | PASS   | N/A    | N/A    | N/A    | N/A    |
+| Timeperiod            | PASS   | PASS   | PASS   | PASS   | N/A    | N/A    | N/A    | N/A    |
+| Service Set           | PASS   | PASS   | PASS   | PASS   | PASS   | PASS   | N/A    | N/A    |
+| DataField             | todo   | todo   | todo   | todo   | N/A    | todo   | N/A    | N/A    |
+| DataList              | PASS   | PASS   | PASS   | N/A    | N/A    | N/A    | N/A    | N/A    |
 
 
 ## Preparations
