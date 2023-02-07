@@ -145,7 +145,7 @@ class IcingaNotification extends IcingaObject implements ExportInterface
 
         } elseif (count($candidates) > 1) {
             throw new DuplicateKeyException(
-                'Service Template "%s" with uuid "%s" already exists. This means there is a duplicate uuid in the database. This should never happen.',
+                'Notification "%s" with uuid "%s" already exists. This means there is a duplicate uuid in the database. This should never happen.',
                 $name,
                 $properties['uuid']
             );
