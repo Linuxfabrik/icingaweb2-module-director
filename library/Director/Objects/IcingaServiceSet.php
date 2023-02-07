@@ -193,6 +193,32 @@ class IcingaServiceSet extends IcingaObject implements ExportInterface
                 $name
             ));
         }
+
+        // convert the string uuid to binary / an UuidInterface, which is how the rest of the code expects it to be
+        $properties['uuid'] = Uuid::fromString($properties['uuid'])->getBytes();
+
+        $table = 'icinga_service_set'; // since this is a static method we cannot use the class variable $table. redefine it here
+
+        // check if there is an existing object in the database based on the uuid
+        $dba = $db->getDbAdapter();
+        $query = $dba->select()
+            ->from($table)
+            ->where('uuid = ?', $properties['uuid']);
+        $candidates = self::loadAll($db, $query);
+        if (count($candidates) == 1) {
+            // by setting the key to the object with the uuid in the databse, the exists check succeeds, causing the old object to be loaded from the db and updated with the new values (setProperties() below).
+            // note that this only works if $key is unique, since the initial load of the existing object is done via key instead of uuid with this method.
+            // if that is a problem, we have to follow a similar approach as in v1.8.1.2021090901.
+            $name = reset($candidates)->properties['object_name']; // reset() returns the first element of the array
+
+        } elseif (count($candidates) > 1) {
+            throw new DuplicateKeyException(
+                'Service Template "%s" with uuid "%s" already exists. This means there is a duplicate uuid in the database. This should never happen.',
+                $name,
+                $properties['uuid']
+            );
+        }
+
         if ($replace && static::exists($name, $db)) {
             $object = static::load($name, $db);
         } elseif (static::exists($name, $db)) {
@@ -216,16 +242,19 @@ class IcingaServiceSet extends IcingaObject implements ExportInterface
             ['s' => 'icinga_service'],
             's.*'
         )->where('service_set_id = ?', $setId);
-        $existingServices = IcingaService::loadAll($db, $sQuery, 'object_name');
-        $serviceNames = [];
+        $existingServices = IcingaService::loadAll($db, $sQuery, 'uuid');
+        $serviceUuids = [];
         foreach ($services as $service) {
+            // convert the string uuid to binary / an UuidInterface, which is how the rest of the code expects it to be
+            $service->uuid = Uuid::fromString($service->uuid)->getBytes();
+
             if (isset($service->fields)) {
                 unset($service->fields);
             }
-            $name = $service->object_name;
-            $serviceNames[] = $name;
-            if (isset($existingServices[$name])) {
-                $existing = $existingServices[$name];
+            $uuid = $service->uuid;
+            $serviceUuids[] = $uuid;
+            if (isset($existingServices[$uuid])) {
+                $existing = $existingServices[$uuid];
                 $existing->setProperties((array) $service);
                 $existing->set('service_set_id', $setId);
                 if ($existing->hasBeenModified()) {
@@ -239,7 +268,7 @@ class IcingaServiceSet extends IcingaObject implements ExportInterface
         }
 
         foreach ($existingServices as $existing) {
-            if (!in_array($existing->getObjectName(), $serviceNames)) {
+            if (!in_array($existing->uuid, $serviceUuids)) {
                 $existing->delete();
             }
         }

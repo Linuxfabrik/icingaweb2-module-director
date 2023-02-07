@@ -1,0 +1,29 @@
+{
+    "ServiceSet": {
+        "___TEST___service_set1-renamed": {
+            "object_name": "___TEST___service_set1-renamed",
+            "object_type": "template",
+            "services": {
+                "___TEST___service_set_subservice1": {
+                    "fields": [],
+                    "imports": [
+                        "___TEST___service_template1"
+                    ],
+                    "object_name": "___TEST___service_set_subservice1",
+                    "object_type": "object",
+                    "uuid": "db39da33-9176-488a-9845-9cddbc039a2b"
+                },
+                "___TEST___service_set_subservice2": {
+                    "fields": [],
+                    "imports": [
+                        "___TEST___service_template1"
+                    ],
+                    "object_name": "___TEST___service_set_subservice2",
+                    "object_type": "object",
+                    "uuid": "daf8b4dd-7025-4195-b7d5-c75bcca4ff62"
+                }
+            },
+            "uuid": "9b87e84d-d61b-4e15-b37e-23c44c7fcce4"
+        }
+    }
+}
