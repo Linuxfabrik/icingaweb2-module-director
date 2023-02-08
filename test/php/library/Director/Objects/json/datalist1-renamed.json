@@ -3,8 +3,14 @@
         "___TEST___datalist1-renamed": {
             "entries": [
                 {
-                    "entry_name": "___TEST___list_entry",
-                    "entry_value": "___TEST___ List Entry",
+                    "entry_name": "___TEST___list_entry1",
+                    "entry_value": "___TEST___ List Entry 1",
+                    "format": "string",
+                    "allowed_roles": null
+                },
+                {
+                    "entry_name": "___TEST___list_entry2",
+                    "entry_value": "___TEST___ List Entry 2",
                     "format": "string",
                     "allowed_roles": null
                 }

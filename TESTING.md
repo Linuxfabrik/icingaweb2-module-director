@@ -2,17 +2,17 @@
 
 Since the phpunit tests currently do not seem to work with the Uuid library, we manually test the newly added features of the fork.
 
-| Object                | Test 1 | Test 2 | Test 3 | Test 4 | Test 5 | Test 6 | Test 7 | Test 8 |
-| ---                   | ---    | ---    | ---    | ---    | ---    | ---    | ---    | ---    |
-| Command               | PASS   | PASS   | PASS   | PASS   | N/A    | N/A    | N/A    | N/A    |
-| Service Template      | PASS   | PASS   | PASS   | PASS   | N/A    | N/A    | N/A    | N/A    |
-| Notification Template | PASS   | PASS   | PASS   | PASS   | N/A    | N/A    | N/A    | N/A    |
-| Host Template         | PASS   | PASS   | PASS   | PASS   | N/A    | N/A    | N/A    | N/A    |
-| Dependency            | PASS   | PASS   | PASS   | PASS   | N/A    | N/A    | N/A    | N/A    |
-| Timeperiod            | PASS   | PASS   | PASS   | PASS   | N/A    | N/A    | N/A    | N/A    |
-| Service Set           | PASS   | PASS   | PASS   | PASS   | PASS   | PASS   | N/A    | N/A    |
-| DataField             | todo   | todo   | todo   | todo   | N/A    | todo   | N/A    | N/A    |
-| DataList              | PASS   | PASS   | PASS   | N/A    | N/A    | N/A    | N/A    | N/A    |
+| Object                | Test 1 | Test 2 | Test 3 | Test 4 | Test 5 | Test 6 | Test 7 |
+| ---                   | ---    | ---    | ---    | ---    | ---    | ---    | ---    |
+| Command               | PASS   | PASS   | PASS   | PASS   | N/A    | N/A    | N/A    |
+| Service Template      | PASS   | PASS   | PASS   | PASS   | N/A    | N/A    | N/A    |
+| Notification Template | PASS   | PASS   | PASS   | PASS   | N/A    | N/A    | N/A    |
+| Host Template         | PASS   | PASS   | PASS   | PASS   | N/A    | N/A    | N/A    |
+| Dependency            | PASS   | PASS   | PASS   | PASS   | N/A    | N/A    | N/A    |
+| Timeperiod            | PASS   | PASS   | PASS   | PASS   | N/A    | N/A    | N/A    |
+| Service Set           | PASS   | PASS   | PASS   | PASS   | PASS   | PASS   | N/A    |
+| DataField             | PASS   | PASS   | PASS   | N/A    | N/A    | N/A    | N/A    |
+| DataList              | PASS   | PASS   | PASS   | N/A    | N/A    | N/A    | PASS   |
 
 
 ## Preparations
@@ -64,6 +64,7 @@ EOF
     * `icingacli director basket restore < /usr/share/icingaweb2/modules/director/test/php/library/Director/Objects/json/<object>1-renamed.json`
     * `icingacli director basket dump --name export`
 * make sure that there is only one object with the new name and same uuid present
+* if DataField: make sure that the applied variable on the Command is renamed as well
 
 
 ## Test 4: cloning with uuids
@@ -94,11 +95,10 @@ EOF
 * make sure that the subservice is renamed
 
 
-## Test 7: renaming a DataField
-* todo
-* applied custom variables (for example on a host) should be renamed as well
-
-
-## Test 8: remove entry from DataList
-* todo
-* entry should be absent in the director
+## Test 7: remove entry from DataList
+* manually delete all DataLists (since `--purge` does not work)
+* `icingacli director basket restore < /usr/share/icingaweb2/modules/director/test/php/library/Director/Objects/json/datalist1.json`
+* `icingacli director basket dump --name export`
+* `icingacli director basket restore < /usr/share/icingaweb2/modules/director/test/php/library/Director/Objects/json/datalist1-removed-entry.json`
+* `icingacli director basket dump --name export`
+* make sure that the entry is absent

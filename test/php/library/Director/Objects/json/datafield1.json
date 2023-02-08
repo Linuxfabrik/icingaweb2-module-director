@@ -1,0 +1,71 @@
+{
+    "Command": {
+        "___TEST___command_for_datafields": {
+            "command": "exit 0",
+            "fields": [
+                {
+                    "datafield_id": 1,
+                    "is_required": "n",
+                    "var_filter": null
+                },
+                {
+                    "datafield_id": 2,
+                    "is_required": "n",
+                    "var_filter": null
+                }
+            ],
+            "methods_execute": "PluginCheck",
+            "object_name": "___TEST___command_for_datafields",
+            "object_type": "object",
+            "uuid": "6c1939c0-f136-44d3-91d9-dba26eaf2cfd",
+            "vars": {
+                "___TEST___datafield1": [
+                    "test-value"
+                ]
+            }
+        }
+    },
+    "DataList": {
+        "___TEST___datalist_for_datafields": {
+            "entries": [
+                {
+                    "entry_name": "___TEST___list_entry",
+                    "entry_value": "___TEST___ List Entry",
+                    "format": "string",
+                    "allowed_roles": null
+                }
+            ],
+            "list_name": "___TEST___datalist_for_datafields",
+            "owner": "admin",
+            "uuid": "f265f4d0-4c26-43a1-8576-8117ea0762c1"
+        }
+    },
+    "Datafield": {
+        "1": {
+            "uuid": "f505542b-0af0-4f0e-b90b-f4ca857edf6e",
+            "varname": "___TEST___datafield1",
+            "caption": "___TEST___ Data Field 1",
+            "description": null,
+            "datatype": "Icinga\\Module\\Director\\DataType\\DataTypeArray",
+            "format": null,
+            "originalId": "1",
+            "settings": {},
+            "category": null
+        },
+        "2": {
+            "uuid": "ab05bafa-8443-4772-964b-2f5ad86cc24c",
+            "varname": "___TEST___datafield2",
+            "caption": "___TEST___ Data Field 2",
+            "description": null,
+            "datatype": "Icinga\\Module\\Director\\DataType\\DataTypeDatalist",
+            "format": null,
+            "originalId": "2",
+            "settings": {
+                "behavior": "strict",
+                "data_type": "string",
+                "datalist": "___TEST___datalist_for_datafields"
+            },
+            "category": null
+        }
+    }
+}
