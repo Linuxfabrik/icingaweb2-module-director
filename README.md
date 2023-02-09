@@ -47,7 +47,7 @@ mysql -p -u root director < schema/add-uuids.sql
 If you are migrating from our [old fork](https://git.linuxfabrik.ch/linuxfabrik/icingaweb2-module-director), follow these steps:
 * disable the Director module in IcingaWeb2
 * install this fork
-* apply the required sql migrations:
+* apply the required SQL migrations:
 ```bash
 mysql -p -u root director < schema/guuids2uuids-migration.sql
 ```
@@ -58,7 +58,7 @@ mysql -p -u root director < schema/guuids2uuids-migration.sql
 * Currently the only supported database is MySQL/MariaDB.
 * Importing Baskets without UUIDs (for the objects listed above) does not work.
 * DataFields: Renaming or removing an entry will only rename/remove the entry in the datalist, not the applied variables on other objects such as hosts or services.
-* The fork is not tested with the [Configuration Branches for Icinga Director](https://icinga.com/docs/icinga-director-branches/latest/).
+* The fork is not tested with [Configuration Branches for Icinga Director](https://icinga.com/docs/icinga-director-branches/latest/).
 
 
 ## Future
