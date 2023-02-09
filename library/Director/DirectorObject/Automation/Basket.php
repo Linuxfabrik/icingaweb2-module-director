@@ -20,6 +20,9 @@ class Basket extends DbObject implements ExportInterface
 
     protected $table = 'director_basket';
 
+    // setting this, so that DbObject->hasUuidColumn() returns true, so that the uuid is converted in Exporter->export()
+    protected $uuidColumn = 'uuid';
+
     protected $keyName = 'basket_name';
 
     protected $chosenObjects = [];

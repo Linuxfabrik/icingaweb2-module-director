@@ -70,6 +70,12 @@ class Exporter
             $props = $chosen;
         }
 
+        // currently adding the uuid to the object here, as this only affects objects to be exported.
+        // another option would be to do this in `IcingaObject::toPlainObject()`, however that leads to many errors since currently all functions using toPlainObject expect the uuid to still be in binary
+        if ($object->hasUuidColumn()) {
+            // augment output with uuid if present
+            $props[$object->getUuidColumn()] = Uuid::fromBytes($object->get($object->getUuidColumn()))->toString();
+        }
         ksort($props);
         return (object) $props;
     }
@@ -249,12 +255,6 @@ class Exporter
                 $props['settings'] = (object) $object->getSettings(); // Already sorted
             }
         }
-        // currently adding the uuid to the object here, as this only affects objects to be exported.
-        // another option would be to do this in `IcingaObject::toPlainObject()`, however that leads to many errors since currently all functions using toPlainObject expect the uuid to still be in binary
-        if ($object->hasUuidColumn()) {
-            // augment output with uuid if present
-            $props[$object->getUuidColumn()] = Uuid::fromBytes($object->get($object->getUuidColumn()))->toString();
-        }
 
         if (! $this->showDefaults) {
             foreach ($props as $key => $value) {
@@ -278,12 +278,6 @@ class Exporter
         $props = (array) $object->toPlainObject($this->resolveObjects, !$this->showDefaults);
         if ($object->supportsFields()) {
             $props['fields'] = $this->fieldReferenceLoader->loadFor($object);
-        }
-        // currently adding the uuid to the object here, as this only affects objects to be exported.
-        // another option would be to do this in `IcingaObject::toPlainObject()`, however that leads to many errors since currently all functions using toPlainObject expect the uuid to still be in binary
-        if ($object->hasUuidColumn()) {
-            // augment output with uuid if present
-            $props[$object->getUuidColumn()] = Uuid::fromBytes($object->get($object->getUuidColumn()))->toString();
         }
 
         return $props;
