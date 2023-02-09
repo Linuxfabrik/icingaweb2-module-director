@@ -2,7 +2,7 @@
 
 ## Motivation - Why we forked
 
-We manage the Icinga Director configuration of many Icinga2 servers using the Icinga Director Basket Ex- and Import. Currently the basket matches items by their _name_, which means it is _impossible_ to rename existing items. Instead, renaming creates a new object with the new name, requiring us to manually delete the object with the old name on each Icinga2 server.
+We manage the Icinga Director configuration of many Icinga2 servers using the Icinga Director configuration basket ex- and import. Currently the basket matches objects by their _name_, which means it is _impossible_ to rename existing objects. Instead, renaming creates a new object with the new name, requiring us to manually delete the object with the old name on each Icinga2 server.
 
 This is particularly problematic with DataFields: If you change any attribute (e.g. the caption or just the description), the original Icinga Director basket creates a _new_ DataField. Assuming you did not change the field name, you now have two DataFields with the same field name. When you delete the first/old one, you are asked if you want to delete the associated vars.
 
@@ -13,9 +13,9 @@ We have changed this.
 
 ## Features
 
-This fork of the Icinga Director implements exporting and importing of Director Baskets based on [UUIDs] (https://en.wikipedia.org/wiki/Universally_unique_identifier).
+This fork of the Icinga Director implements exporting and importing of Director baskets based on [UUIDs] (https://en.wikipedia.org/wiki/Universally_unique_identifier).
 
-For the following objects, the UUID is used instead of the object name when exporting and importing via Director Baskets:
+For the following objects, the UUID is used instead of the object name when exporting and importing via Director baskets:
 
 * DataFields
 * Commands
@@ -29,7 +29,7 @@ For the following objects, the UUID is used instead of the object name when expo
 
 This allows the following tasks to be performed by importing a basket
 
-* Change the name of the objects listed above. Without UUIDs, this would always create a new object instead.
+* Changing the name of the objects listed above. Without UUIDs, this would always create a new object instead.
 * DataFields: When renaming, any custom variables applied (e.g. to a host) are also renamed.
 * DataLists: Entries can be removed from the list. Note: This does not affect applied entries as they are stored as strings in the database. See [Known Limitations] (#known-limitations) below.
 * Service Sets: Services can be removed from the set.
@@ -44,13 +44,14 @@ If you are currently using the [official (upstream) Icinga Director](https://git
 mysql -p -u root director < schema/add-uuids.sql
 ```
 
-If you are migrating from our [old fork] (https://git.linuxfabrik.ch/linuxfabrik/icingaweb2-module-director), follow these steps
-* disable the Director module in IcingaWeb2
+If you are migrating from our [old fork](https://git.linuxfabrik.ch/linuxfabrik/icingaweb2-module-director), follow these steps
+* Disable the Director module in IcingaWeb2
 * Install this fork
 * Apply the required SQL migrations:
 ```bash
 mysql -p -u root director < schema/guuids2uuids-migration.sql
 ```
+* Enable the Director
 
 
 ## Known limitations
