@@ -7,6 +7,7 @@ Since the phpunit tests currently do not seem to work with the Uuid library, we 
 | Command               | PASS   | PASS   | PASS   | PASS   | N/A    | N/A    | N/A    |
 | Service Template      | PASS   | PASS   | PASS   | PASS   | N/A    | N/A    | N/A    |
 | Notification Template | PASS   | PASS   | PASS   | PASS   | N/A    | N/A    | N/A    |
+| Notification          | PASS   | PASS   | PASS   | PASS   | N/A    | N/A    | N/A    |
 | Host Template         | PASS   | PASS   | PASS   | PASS   | N/A    | N/A    | N/A    |
 | Dependency            | PASS   | PASS   | PASS   | PASS   | N/A    | N/A    | N/A    |
 | Timeperiod            | PASS   | PASS   | PASS   | PASS   | N/A    | N/A    | N/A    |

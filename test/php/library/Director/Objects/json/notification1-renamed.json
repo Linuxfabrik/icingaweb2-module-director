@@ -1,0 +1,23 @@
+{
+    "Notification": {
+        "___TEST___notification1-renamed": {
+            "apply_to": "host",
+            "assign_filter": "host.address=%22%2A%22",
+            "fields": [],
+            "imports": [
+                "___TEST___notification_template_for_notification1"
+            ],
+            "object_name": "___TEST___notification1-renamed",
+            "object_type": "apply",
+            "uuid": "9d938929-5d63-4a23-a58e-42e494faa17c"
+        }
+    },
+    "NotificationTemplate": {
+        "___TEST___notification_template_for_notification1": {
+            "fields": [],
+            "object_name": "___TEST___notification_template_for_notification1",
+            "object_type": "template",
+            "uuid": "222c4888-ecaf-4cc8-848c-364a277412f3"
+        }
+    }
+}
