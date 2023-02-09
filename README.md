@@ -51,6 +51,7 @@ If you are migrating from our [old fork](https://git.linuxfabrik.ch/linuxfabrik/
 ```bash
 mysql -p -u root director < schema/guuids2uuids-migration.sql
 ```
+* enable the Director module
 
 
 ## Known limitations
