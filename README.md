@@ -44,7 +44,7 @@ If you are currently using the [official (upstream) Icinga Director](https://git
 mysql -p -u root icinga_director < schema/add-uuids.sql
 ```
 
-If you are migrating from our [old fork](https://git.linuxfabrik.ch/linuxfabrik/icingaweb2-module-director), follow these steps
+If you are migrating from our [old fork](https://git.linuxfabrik.ch/linuxfabrik/icingaweb2-module-director) (up to v1.8.1), follow these steps
 * Disable the Director module in IcingaWeb2
 * Install this fork
 * Apply the required SQL migrations:
