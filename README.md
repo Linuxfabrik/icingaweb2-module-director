@@ -49,7 +49,7 @@ If you are migrating from our [old fork](https://git.linuxfabrik.ch/linuxfabrik/
 * Install this fork
 * Apply the required SQL migrations:
 ```bash
-mysql -p -u root director < schema/guuids2uuids-migration.sql
+mysql -p -u root director < schema/guids2uuids-migration.sql
 ```
 * Enable the Director
 
