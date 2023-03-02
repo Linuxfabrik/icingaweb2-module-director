@@ -13,7 +13,7 @@ We have changed this.
 
 ## Features
 
-This fork of the Icinga Director implements exporting and importing of Director baskets based on [UUIDs] (https://en.wikipedia.org/wiki/Universally_unique_identifier).
+This fork of the Icinga Director implements exporting and importing of Director baskets based on [UUIDs](https://en.wikipedia.org/wiki/Universally_unique_identifier).
 
 For the following objects, the UUID is used instead of the object name when exporting and importing via Director baskets:
 
