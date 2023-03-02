@@ -41,7 +41,7 @@ Follow the [installation instructions](doc/02-Installation.md.d/From-Source.md),
 
 If you are currently using the [official (upstream) Icinga Director](https://github.com/Icinga/icingaweb2-module-director), apply the modified schema as follows:
 ```bash
-mysql -p -u root director < schema/add-uuids.sql
+mysql -p -u root icinga_director < schema/add-uuids.sql
 ```
 
 If you are migrating from our [old fork](https://git.linuxfabrik.ch/linuxfabrik/icingaweb2-module-director), follow these steps
@@ -49,7 +49,7 @@ If you are migrating from our [old fork](https://git.linuxfabrik.ch/linuxfabrik/
 * Install this fork
 * Apply the required SQL migrations:
 ```bash
-mysql -p -u root director < schema/guids2uuids-migration.sql
+mysql -p -u root icinga_director < schema/guids2uuids-migration.sql
 ```
 * Enable the Director
 
