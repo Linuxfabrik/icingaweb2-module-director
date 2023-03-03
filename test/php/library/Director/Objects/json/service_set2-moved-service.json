@@ -1,0 +1,20 @@
+{
+    "ServiceSet": {
+        "___TEST___service_set2": {
+            "object_name": "___TEST___service_set2",
+            "object_type": "template",
+            "services": {
+                "___TEST___service_set_subservice1": {
+                    "fields": [],
+                    "imports": [
+                        "___TEST___service_template1"
+                    ],
+                    "object_name": "___TEST___service_set_subservice1",
+                    "object_type": "object",
+                    "uuid": "db39da33-9176-488a-9845-9cddbc039a2b"
+                }
+            },
+            "uuid": "13081e5c-4766-4af5-ad6b-7b79526df641"
+        }
+    }
+}

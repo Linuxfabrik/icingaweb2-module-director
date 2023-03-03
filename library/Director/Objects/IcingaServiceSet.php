@@ -242,7 +242,8 @@ class IcingaServiceSet extends IcingaObject implements ExportInterface
             ['s' => 'icinga_service'],
             's.*'
         )->where('service_set_id = ?', $setId);
-        $existingServices = IcingaService::loadAll($db, $sQuery, 'uuid');
+        $serviceSetServices = IcingaService::loadAll($db, $sQuery, 'uuid');
+        $existingServices = IcingaService::loadAll($db, null, 'uuid'); // it is possible that the service already exists in a different service set, therefore we need to get all services. maybe possible to restrict this to all services beloging to any services set in the future
         $serviceUuids = [];
         foreach ($services as $service) {
             // convert the string uuid to binary / an UuidInterface, which is how the rest of the code expects it to be
@@ -267,7 +268,7 @@ class IcingaServiceSet extends IcingaObject implements ExportInterface
             }
         }
 
-        foreach ($existingServices as $existing) {
+        foreach ($serviceSetServices as $existing) {
             if (!in_array($existing->uuid, $serviceUuids)) {
                 $existing->delete();
             }

@@ -2,18 +2,18 @@
 
 Since the phpunit tests currently do not seem to work with the Uuid library, we manually test the newly added features of the fork.
 
-| Object                | Test 1 | Test 2 | Test 3 | Test 4 | Test 5 | Test 6 | Test 7 |
-| ---                   | ---    | ---    | ---    | ---    | ---    | ---    | ---    |
-| Command               | PASS   | PASS   | PASS   | PASS   | N/A    | N/A    | N/A    |
-| Service Template      | PASS   | PASS   | PASS   | PASS   | N/A    | N/A    | N/A    |
-| Notification Template | PASS   | PASS   | PASS   | PASS   | N/A    | N/A    | N/A    |
-| Notification          | PASS   | PASS   | PASS   | PASS   | N/A    | N/A    | N/A    |
-| Host Template         | PASS   | PASS   | PASS   | PASS   | N/A    | N/A    | N/A    |
-| Dependency            | PASS   | PASS   | PASS   | PASS   | N/A    | N/A    | N/A    |
-| Timeperiod            | PASS   | PASS   | PASS   | PASS   | N/A    | N/A    | N/A    |
-| Service Set           | PASS   | PASS   | PASS   | PASS   | PASS   | PASS   | N/A    |
-| DataField             | PASS   | PASS   | PASS   | N/A    | N/A    | N/A    | N/A    |
-| DataList              | PASS   | PASS   | PASS   | N/A    | N/A    | N/A    | PASS   |
+| Object                | Test 1 | Test 2 | Test 3 | Test 4 | Test 5 | Test 6 | Test 7 | Test 8 |
+| ---                   | ---    | ---    | ---    | ---    | ---    | ---    | ---    | ---    |
+| Command               | PASS   | PASS   | PASS   | PASS   | N/A    | N/A    | N/A    | N/A    |
+| Service Template      | PASS   | PASS   | PASS   | PASS   | N/A    | N/A    | N/A    | N/A    |
+| Notification Template | PASS   | PASS   | PASS   | PASS   | N/A    | N/A    | N/A    | N/A    |
+| Notification          | PASS   | PASS   | PASS   | PASS   | N/A    | N/A    | N/A    | N/A    |
+| Host Template         | PASS   | PASS   | PASS   | PASS   | N/A    | N/A    | N/A    | N/A    |
+| Dependency            | PASS   | PASS   | PASS   | PASS   | N/A    | N/A    | N/A    | N/A    |
+| Timeperiod            | PASS   | PASS   | PASS   | PASS   | N/A    | N/A    | N/A    | N/A    |
+| Service Set           | PASS   | PASS   | PASS   | PASS   | PASS   | PASS   | PASS   | N/A    |
+| DataField             | PASS   | PASS   | PASS   | N/A    | N/A    | N/A    | N/A    | N/A    |
+| DataList              | PASS   | PASS   | PASS   | N/A    | N/A    | N/A    | N/A    | PASS   |
 
 
 ## Preparations
@@ -83,7 +83,7 @@ EOF
 * `icingacli director basket dump --name export`
 * `icingacli director basket restore < /usr/share/icingaweb2/modules/director/test/php/library/Director/Objects/json/service_set1-removed-subservice.json`
 * `icingacli director basket dump --name export`
-* make sure that the subservice is absent from the ServiceSet
+* make sure that `___TEST___service_set_subservice2` is absent from the ServiceSet
 
 
 ## Test 6: rename service inside ServiceSet
@@ -95,8 +95,16 @@ EOF
 * `icingacli director basket dump --name export`
 * make sure that the subservice is renamed
 
+## Test 7: move service to other ServiceSet
+* manually delete all ServiceSets (since `--purge` does not work)
+* `icingacli director basket restore < /usr/share/icingaweb2/modules/director/test/php/library/Director/Objects/json/service_template1.json`
+* `icingacli director basket restore < /usr/share/icingaweb2/modules/director/test/php/library/Director/Objects/json/service_set2.json`
+* `icingacli director basket dump --name export`
+* `icingacli director basket restore < /usr/share/icingaweb2/modules/director/test/php/library/Director/Objects/json/service_set2-moved-service.json`
+* `icingacli director basket dump --name export`
+* make sure that `___TEST___service_set_subservice1` is now part of `___TEST___service_set2`
 
-## Test 7: remove entry from DataList
+## Test 8: remove entry from DataList
 * manually delete all DataLists (since `--purge` does not work)
 * `icingacli director basket restore < /usr/share/icingaweb2/modules/director/test/php/library/Director/Objects/json/datalist1.json`
 * `icingacli director basket dump --name export`
