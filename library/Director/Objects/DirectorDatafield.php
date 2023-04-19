@@ -172,10 +172,11 @@ class DirectorDatafield extends DbObjectWithSettings
     protected static function fixOptionalDatalistReference(stdClass $plain, Db $db)
     {
         if (isset($plain->settings->datalist)) {
-            // Just try to load the list, import should fail if missing
-            $list = DirectorDatalist::load($plain->settings->datalist, $db);
-            unset($plain->settings->datalist);
-            $plain->settings->datalist_id = $list->get('id');
+            $list = DirectorDatalist::loadOptional($plain->settings->datalist, $db);
+            if ($list !== null) {
+                unset($plain->settings->datalist);
+                $plain->settings->datalist_id = $list->get('id');
+            }
         }
     }
 
