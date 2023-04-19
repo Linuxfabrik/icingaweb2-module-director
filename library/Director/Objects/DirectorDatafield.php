@@ -28,6 +28,8 @@ class DirectorDatafield extends DbObjectWithSettings
     protected $uuidColumn = 'uuid';
     protected $settingsTable = 'director_datafield_setting';
     protected $settingsRemoteId = 'datafield_id';
+    protected $shouldBeRenamed = false;
+    protected $preImportName = '';
 
     protected $defaultProperties = [
         'id'            => null,
@@ -47,6 +49,15 @@ class DirectorDatafield extends DbObjectWithSettings
     /** @var ?DirectorDatafieldCategory */
     private $category;
     private $object;
+
+
+    public function shouldBeRenamed() {
+        return $this->shouldBeRenamed;
+    }
+
+    public function getPreImportName() {
+        return $this->preImportName;
+    }
 
     public static function fromDbRow($row, Db $connection)
     {
@@ -156,6 +167,11 @@ class DirectorDatafield extends DbObjectWithSettings
             if ($candidate = DirectorDatafield::loadWithUniqueId($uuid, $db)) {
                 BasketSnapshotFieldResolver::fixOptionalDatalistReference($plain, $db);
                 assert($candidate instanceof DirectorDatafield);
+                // setting the new shouldBeRenamed flag leads to all associated custom variables to be renamed later on (see BasketSnapshotFieldResolver->storeNewFields())
+                if ($candidate->varname != $plain->varname) {
+                    $candidate->shouldBeRenamed = true;
+                    $candidate->preImportName = $candidate->varname;
+                }
                 $candidate->setProperties((array) $plain);
                 return $candidate;
             }
