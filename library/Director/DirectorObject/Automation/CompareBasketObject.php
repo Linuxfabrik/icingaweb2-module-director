@@ -47,9 +47,9 @@ class CompareBasketObject
     {
         usort($list, function ($a, $b) use ($key) {
             if (is_array($a)) {
-                return $a[$key] > $b[$key] ? -1 : 1;
+                return $a[$key] < $b[$key] ? -1 : 1;
             } else {
-                return $a->$key > $b->$key ? -1 : 1;
+                return $a->$key < $b->$key ? -1 : 1;
             }
         });
     }
