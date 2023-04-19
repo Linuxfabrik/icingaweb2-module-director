@@ -2,6 +2,7 @@
 
 namespace Icinga\Module\Director\DirectorObject\Automation;
 
+use Icinga\Module\Director\CustomVariable\CustomVariables;
 use Icinga\Module\Director\Db;
 use Icinga\Module\Director\Objects\DirectorDatafield;
 use Icinga\Module\Director\Objects\DirectorDatalist;
@@ -63,6 +64,10 @@ class BasketSnapshotFieldResolver
             if ($field->hasBeenModified()) {
                 $field->store();
                 $this->idMap[$id] = $field->get('id');
+                // at this point the datafields from the basket are importet and stored in the database, so now we can rename the related custom variables, if the varname of the datafield changed during the import (see Datafield::import())
+                if ($field->shouldBeRenamed()) {
+                    CustomVariables::renameAll($field->getPreImportName(), $field->get('varname'), $this->targetDb);
+                }
             }
         }
     }
