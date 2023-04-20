@@ -42,7 +42,7 @@ mysql -p -u root icinga_director < schema/guids2uuids-migration.sql
 ## Testing
 
 * Import [rename-related-vars1.json](https://github.com/Linuxfabrik/icingaweb2-module-director/blob/feature/basket-rename-vars/test/php/library/Director/Objects/json/rename-related-vars1.json)
-* Create a host which has the custom variable applied and contains a value: `icingacli director host create host2 --imports ___TEST___host_template1 --vars.___TEST___datafield1 'myvalue1'`
+* Create a host which has the custom variable applied and contains a value: `icingacli director host create host1 --imports ___TEST___host_template1 --vars.___TEST___datafield1 'myvalue1'`
 * Import [rename-related-vars2.json](https://github.com/Linuxfabrik/icingaweb2-module-director/blob/feature/basket-rename-vars/test/php/library/Director/Objects/json/rename-related-vars2.json)
 * During this import the variable was renamed from `___TEST___datafield1` to `___TEST___datafield1-renamed`.
 * Make sure that the applied variable on the host is also renamed: `icingacli director host show host1`
