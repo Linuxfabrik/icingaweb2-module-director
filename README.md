@@ -20,16 +20,20 @@ This version of our fork:
 
 ## Installation
 
-Follow the [installation instructions](doc/02-Installation.md.d/From-Source.md). Note: If you are currently using our [old fork](https://git.linuxfabrik.ch/linuxfabrik/icingaweb2-module-director), make sure to disable the Director module before installing this fork.
+Follow the [installation instructions](doc/02-Installation.md.d/From-Source.md). 
 
-If you are migrating from our [old fork](https://git.linuxfabrik.ch/linuxfabrik/icingaweb2-module-director) (up to v1.8.1), follow these steps
-* Disable the Director module in IcingaWeb2
-* Install this fork
+Migrating from [Linuxfabrik fork v1.8.1 or lower](https://git.linuxfabrik.ch/linuxfabrik/icingaweb2-module-director):
+* Important: Disable the Director module in IcingaWeb2 before installing this fork.
+* Install this fork.
 * Apply the required SQL migrations:
 ```bash
 mysql -p -u root icinga_director < schema/guids2uuids-migration.sql
 ```
-* Enable the Director
+* Enable the Director.
+
+Migrating from v1.10.2+ or [Linuxfabrik fork v1.10.2.2023020901](https://git.linuxfabrik.ch/linuxfabrik/icingaweb2-module-director):
+* Install this fork.
+* Use DB-Migrations offered in IcingaWeb2.
 
 
 ## Known limitations
