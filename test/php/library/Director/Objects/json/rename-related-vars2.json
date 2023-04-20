@@ -1,0 +1,15 @@
+{
+    "Datafield": {
+        "1": {
+            "uuid": "f505542b-0af0-4f0e-b90b-f4ca857edf6e",
+            "varname": "___TEST___datafield1-renamed",
+            "caption": "___TEST___ Data Field 1 renamed",
+            "description": null,
+            "datatype": "Icinga\\Module\\Director\\DataType\\DataTypeArray",
+            "format": null,
+            "originalId": "1",
+            "settings": {},
+            "category": null
+        }
+    }
+}
