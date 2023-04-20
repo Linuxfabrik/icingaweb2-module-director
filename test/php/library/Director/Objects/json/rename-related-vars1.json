@@ -1,0 +1,29 @@
+{
+    "HostTemplate": {
+        "___TEST___host_template1": {
+            "fields": [
+                {
+                    "datafield_id": 1,
+                    "is_required": "n",
+                    "var_filter": null
+                }
+            ],
+            "object_name": "___TEST___host_template1",
+            "object_type": "template",
+            "uuid": "79169e4b-a263-4bd7-963d-79c8dfe205d8"
+        }
+    },
+    "Datafield": {
+        "1": {
+            "uuid": "f505542b-0af0-4f0e-b90b-f4ca857edf6e",
+            "varname": "___TEST___datafield1",
+            "caption": "___TEST___ Data Field 1",
+            "description": null,
+            "datatype": "Icinga\\Module\\Director\\DataType\\DataTypeArray",
+            "format": null,
+            "originalId": "1",
+            "settings": {},
+            "category": null
+        }
+    }
+}
