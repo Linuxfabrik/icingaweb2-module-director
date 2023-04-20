@@ -1,61 +1,48 @@
-Icinga Director
-===============
+# Linuxfabrik Fork of the Icinga Director
 
-Icinga Director has been designed to make Icinga 2 configuration handling easy.
-It tries to target two main audiences:
+## Motivation - Why we forked
 
-* Users with the desire to completely automate their datacenter
-* Sysops willing to grant their "point & click" users a lot of flexibility
+Have a look at the [previous version](https://github.com/Linuxfabrik/icingaweb2-module-director/blob/feature/uuid-baskets/README.md) for our initial motivation.
 
-What makes Icinga Director so special is the fact that it tries to target both
-of them at once.
+Fortunately, we had the possibility to work together with Icinga to integrate most of our changes into the master branch of the official Icinga Director.
+However, we are still missing one feature that we need for our deployments: Automatic renaming of applied custom variables.
 
-![Icinga Director](doc/screenshot/director/readme/director_main_screen.png)
+## Features
 
-Read more about Icinga Director in our [Introduction](doc/01-Introduction.md) section.
-Afterwards, you should be ready for [getting started](doc/04-Getting-started.md).
+This version of our fork:
 
-Documentation
--------------
+* is based on the official master branch (commit [35e90f7b6008075bb6d61a55fe12988df3c8b5c7](https://github.com/Icinga/icingaweb2-module-director/tree/35e90f7b6008075bb6d61a55fe12988df3c8b5c7))
+* automatically renames applied related vars during basket imports. Have a look at [Testing](#Testing) for details.
+* fixes https://github.com/Icinga/icingaweb2-module-director/issues/2725
+* fixes https://github.com/Icinga/icingaweb2-module-director/issues/2734
+* makes the MySQL migrations "nicer" - they do not fail if the uuid columns already exist (making migrations easier)
 
-Please have a look at our [Installation instructions](doc/02-Installation.md)
-and our hints for how to apply [Upgrades](doc/05-Upgrading.md). We love automation
-and in case you also do so, the [Automation chapter](doc/03-Automation.md) could
-be worth a read. When upgrading, you should also have a look at our [Changelog](doc/82-Changelog.md).
 
-You could be interested in understanding how the [Director works](doc/10-How-it-works.md)
-internally. [Working with agents](doc/24-Working-with-agents.md) is a topic that
-affects many Icinga administrators. Other interesting entry points might be
-[Import and Synchronization](doc/70-Import-and-Sync.md), our [CLI interface](doc/60-CLI.md),
-the [REST API](doc/70-REST-API.md) and last but not least our [FAQ](doc/80-FAQ.md).
+## Installation
 
-A complete list of all our documentation can be found in the [doc](doc/) directory.
+Follow the [installation instructions](doc/02-Installation.md.d/From-Source.md). Note: If you are currently using our [old fork](https://git.linuxfabrik.ch/linuxfabrik/icingaweb2-module-director), make sure to disable the Director module before installing this fork.
 
-Contributing
-------------
+If you are migrating from our [old fork](https://git.linuxfabrik.ch/linuxfabrik/icingaweb2-module-director) (up to v1.8.1), follow these steps
+* Disable the Director module in IcingaWeb2
+* Install this fork
+* Apply the required SQL migrations:
+```bash
+mysql -p -u root icinga_director < schema/guids2uuids-migration.sql
+```
+* Enable the Director
 
-Icinga Director is an Open Source project and lives from your contributions. No
-matter whether these are feature requests, issues, translations, documentation
-or code.
 
-* Please check whether a related issue already exists on our [Issue Tracker](https://github.com/Icinga/icingaweb2-module-director/issues)
-* Make sure your code conforms to the [PSR-2: Coding Style Guide](http://www.php-fig.org/psr/psr-2/)
-* [Unit-Tests](doc/93-Testing.md) would be great
-* Send a [Pull Request](https://github.com/Icinga/icingaweb2-module-director/pulls)
+## Known limitations
 
-Addons
-------
+* Since the fork is based on the master branch instead of a full release, there are still some open upstream bugs to be expected.
+* DataFields: Renaming or removing an entry will only rename/remove the entry in the datalist, not the applied variables on other objects such as hosts or services.
+* The fork is not tested with [Configuration Branches for Icinga Director](https://icinga.com/docs/icinga-director-branches/latest/).
 
-The following are to be considered community-supported modules, as they are not
-supported by the Icinga Team. At least not yet. But please give them a try if
-they fit your needs. They are being used in productive environments:
 
-* [AWS - Amazon Web Services](https://github.com/Icinga/icingaweb2-module-aws):
-  provides an Import Source for Autoscaling Groups on AWS
-* [File-Shipper](https://github.com/Icinga/icingaweb2-module-fileshipper):
-  allows Director to ship additional config files with manual config with its
-  deployments
-* [PuppetDB](https://github.com/Icinga/icingaweb2-module-puppetdb): provides
-  an Import Source dealing with your PuppetDB
-* [vSphere](https://github.com/Icinga/icingaweb2-module-vsphere): VMware vSphere
-  Import Source for Virtual Machines and Host Systems
+## Testing
+
+* Import [rename-related-vars1.json](https://github.com/Linuxfabrik/icingaweb2-module-director/blob/feature/basket-rename-vars/test/php/library/Director/Objects/json/rename-related-vars1.json)
+* Create a host which has the custom variable applied and contains a value: `icingacli director host create host2 --imports ___TEST___host_template1 --vars.___TEST___datafield1 'myvalue1'`
+* Import [rename-related-vars2.json](https://github.com/Linuxfabrik/icingaweb2-module-director/blob/feature/basket-rename-vars/test/php/library/Director/Objects/json/rename-related-vars2.json)
+* During this import the variable was renamed from `___TEST___datafield1` to `___TEST___datafield1-renamed`.
+* Make sure that the applied variable on the host is also renamed: `icingacli director host show host1`
