@@ -4,39 +4,11 @@
 Please make sure to always read our [Upgrading](05-Upgrading.md) documentation
 before switching to a new version.
 
-v1.11.0 (unreleased)
---------------------
-
-This version hasn't been released yet
+v1.10.3
+-------
 
 ### UI
-* FEATURE: allow to clone commands with fields (#2264)
-* FEATURE: Data Fields are now sorted in a case-insensitive way (#2358)
-* FEATURE: Deployment Log now breaks lines (#2677)
-* FEATURE: Sort Template trees by name (#2691)
-* FIX: do not fail for (some) Service Dependencies (#2669, #1142)
-
-### Icinga Configuration
-* FIX: render Set Services to individual zones where required (#1589, #2356)
-
-### Import and Sync
-* FEATURE: regular expression based modifier allows explicit NULL on no match (#2705)
-
-### Permissions and Restrictions
-* FIX: monitoring-related permission checks have been refactored (#2712)
-
-### Configuration Branches
-* FEATURE: with this release, directorbranches v1.3 supports a "default branch" (#2688)
-* FEATURE: users with default branches get warnings in the main branch (#2689)
-* FIX: create a branched set, add services, modify them (#2710)
-
-### Health Check
-* FIX: complaint about overdue jobs was not correct (#2680, #2681)
-
-### Fixed issues
-* You can find issues and feature requests related to this release on our
-  [roadmap](https://github.com/Icinga/icingaweb2-module-director/milestone/33?closed=1)
-
+* FIX: The activity log now avoids a bug in PHP introduced with version 8.1.25 (#2828)
 
 v1.10.2
 -------
