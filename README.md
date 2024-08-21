@@ -11,10 +11,9 @@ However, we are still missing one feature that we need for our deployments: Auto
 
 This version of our fork:
 
-* is based on the official master branch (commit [35e90f7b6008075bb6d61a55fe12988df3c8b5c7](https://github.com/Icinga/icingaweb2-module-director/tree/35e90f7b6008075bb6d61a55fe12988df3c8b5c7))
+* is based on the official [v1.11.1 release](https://github.com/Icinga/icingaweb2-module-director/releases/tag/v1.11.1) (on the [support/1.11 branch](https://github.com/Icinga/icingaweb2-module-director/tree/support/1.11))
 * automatically renames applied related vars during basket imports. Have a look at [Testing](#Testing) for details.
 * fixes https://github.com/Icinga/icingaweb2-module-director/issues/2725
-* fixes https://github.com/Icinga/icingaweb2-module-director/issues/2734
 * makes the MySQL migrations "nicer" - they do not fail if the uuid columns already exist (making migrations easier)
 
 
@@ -33,12 +32,11 @@ mysql -p -u root icinga_director < schema/guids2uuids-migration.sql
 
 Migrating from v1.10.2+ or [Linuxfabrik fork v1.10.2.2023020901](https://git.linuxfabrik.ch/linuxfabrik/icingaweb2-module-director):
 * Install this fork.
-* Use DB-Migrations offered in IcingaWeb2.
+* Use the DB-Migrations offered in IcingaWeb2.
 
 
 ## Known limitations
 
-* Since the fork is based on the master branch instead of a full release, there are still some open upstream bugs to be expected.
 * DataFields: Renaming or removing an entry will only rename/remove the entry in the datalist, not the applied variables on other objects such as hosts or services.
 * The fork is not tested with [Configuration Branches for Icinga Director](https://icinga.com/docs/icinga-director-branches/latest/).
 
