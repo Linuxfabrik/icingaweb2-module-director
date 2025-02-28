@@ -43,7 +43,7 @@ You might want to use a script as follows for this task:
 ```shell
 MODULE_VERSION="1.11.3.2025012101"
 ICINGAWEB_MODULEPATH="/usr/share/icingaweb2/modules"
-REPO_URL="https://github.com/icinga/icingaweb2-module-director"
+REPO_URL="https://github.com/linuxfabrik/icingaweb2-module-director"
 TARGET_DIR="${ICINGAWEB_MODULEPATH}/director"
 URL="${REPO_URL}/archive/v${MODULE_VERSION}.tar.gz"
 
