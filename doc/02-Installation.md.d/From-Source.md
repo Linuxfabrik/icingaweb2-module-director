@@ -46,7 +46,7 @@ You might want to use a script as follows for this task:
 ```shell
 MODULE_VERSION="v1.11.9.2026070601"
 ICINGAWEB_MODULEPATH="/usr/share/icingaweb2/modules"
-REPO_URL="https://github.com/icinga/icingaweb2-module-director"
+REPO_URL="https://github.com/Linuxfabrik/icingaweb2-module-director"
 TARGET_DIR="${ICINGAWEB_MODULEPATH}/director"
 URL="${REPO_URL}/archive/v${MODULE_VERSION}.tar.gz"
 
@@ -65,7 +65,7 @@ You might want to use a script as follows for this task:
 ```shell
 MODULE_VERSION="v1.11.9.2026070601"
 ICINGAWEB_MODULEPATH="/usr/share/icingaweb2/modules"
-REPO_URL="https://github.com/icinga/icingaweb2-module-director"
+REPO_URL="https://github.com/Linuxfabrik/icingaweb2-module-director"
 TARGET_DIR="${ICINGAWEB_MODULEPATH}/director"
 
 git clone "${REPO_URL}" "${TARGET_DIR}" --branch v${MODULE_VERSION}
