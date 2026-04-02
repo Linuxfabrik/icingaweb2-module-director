@@ -11,7 +11,7 @@ However, we are still missing one feature that we need for our deployments: Auto
 
 This version of our fork:
 
-* is based on the official [v1.11.7 release](https://github.com/Icinga/icingaweb2-module-director/releases/tag/v1.11.7)
+* is based on the official [v1.11.8 release](https://github.com/Icinga/icingaweb2-module-director/releases/tag/v1.11.8)
 * automatically renames applied related vars during basket imports. Have a look at [Testing](#Testing) for details.
 * fixes https://github.com/Icinga/icingaweb2-module-director/issues/2725
 * makes the MySQL migrations "nicer" - they do not fail if the uuid columns already exist (making migrations easier)
