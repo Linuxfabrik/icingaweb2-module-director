@@ -12,7 +12,7 @@ However, we are still missing one feature that we need for our deployments: Auto
 This version of our fork:
 
 * is based on the official [v1.12.1 release](https://github.com/Icinga/icingaweb2-module-director/releases/tag/v1.12.1)
-* automatically renames applied related vars during basket imports. Have a look at [Testing](#Testing) for details.
+* automatically renames applied related vars of Data Fields during basket imports. Have a look at [Testing](#Testing) for details. Custom Variables (the Director's successor to Data Fields) are renamed by the official Director itself.
 * fixes https://github.com/Icinga/icingaweb2-module-director/issues/2725
 * makes the MySQL migrations "nicer" - they do not fail if the uuid columns already exist (making migrations easier)
 
@@ -38,6 +38,8 @@ Migrating from v1.10.2+ or [Linuxfabrik fork v1.10.2.2023020901](https://git.lin
 ## Known limitations
 
 * DataFields: Renaming or removing an entry will only rename/remove the entry in the datalist, not the applied variables on other objects such as hosts or services.
+* Data Fields: Applied vars are not renamed during basket imports if the old or the new name belongs to a Custom Variable. Both share the same storage, so renaming would move values that belong to the Custom Variable.
+* Data Fields: Do not convert them with `icingacli director migrate datafields` as long as baskets are shared across Director instances. The conversion assigns random UUIDs per instance. A basket still matches a Custom Variable by name, but a renamed Custom Variable is then created as a new one and the applied vars keep the old name.
 * The fork is not tested with [Configuration Branches for Icinga Director](https://icinga.com/docs/icinga-director-branches/latest/).
 
 
