@@ -14,21 +14,11 @@ This version of our fork:
 * is based on the official [v1.12.1 release](https://github.com/Icinga/icingaweb2-module-director/releases/tag/v1.12.1)
 * automatically renames applied related vars of Data Fields during basket imports. Have a look at [Testing](#Testing) for details. Custom Variables (the Director's successor to Data Fields) are renamed by the official Director itself.
 * fixes https://github.com/Icinga/icingaweb2-module-director/issues/2725
-* makes the MySQL migrations "nicer" - they do not fail if the uuid columns already exist (making migrations easier)
 
 
 ## Installation
 
 Follow the [installation instructions](doc/02-Installation.md.d/From-Source.md).
-
-Migrating from [Linuxfabrik fork v1.8.1 or lower](https://git.linuxfabrik.ch/linuxfabrik/icingaweb2-module-director):
-* Important: Disable the Director module in IcingaWeb2 before installing this fork.
-* Install this fork.
-* Apply the required SQL migrations:
-```bash
-mysql -p -u root icinga_director < schema/guids2uuids-migration.sql
-```
-* Enable the Director.
 
 Migrating from v1.10.2+ or [Linuxfabrik fork v1.10.2.2023020901](https://git.linuxfabrik.ch/linuxfabrik/icingaweb2-module-director):
 * Install this fork.
